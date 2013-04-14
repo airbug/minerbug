@@ -60,6 +60,7 @@ var MinerBug = Class.extend(Obj, {
     initialize: function(callback){
         var _this           = this;
         var callback        = callback || function(){};
+        _this.app = express();
 
         /*
         var configFile      = path.resolve(__dirname, '..', 'sonarbug.config.json');
@@ -120,11 +121,11 @@ var MinerBug = Class.extend(Obj, {
             $parallel([
                 $task(function(flow){
                     // Create Server
-                    app = _this.app = express();
+                    app = _this.app;
                     server = _this.server = http.createServer(app);
 
                     _this.configure(app, express, function(){
-                        console.log("SonarBug configured");
+                        console.log("Minerbug configured");
                     });
 
                     /*
@@ -134,7 +135,7 @@ var MinerBug = Class.extend(Obj, {
                     */
 
                     server.listen(app.get('port'), function(){
-                        console.log("SonarBug listening on port", app.get('port'));
+                        console.log("Minerbug listening on port", app.get('port'));
                     });
 
                     flow.complete();
@@ -160,7 +161,7 @@ var MinerBug = Class.extend(Obj, {
             ])
         ]).execute(function(error){
                 if(!error){
-                    console.log("SonarBug successfully started");
+                    console.log("Minerbug successfully started");
                 } else {
                     console.error(error);
                     console.error(error.stack);
@@ -179,7 +180,7 @@ var MinerBug = Class.extend(Obj, {
             app.set('port', process.env.PORT || 8000);
             // app.use(express.favicon());
             app.use(express.logger('dev'));
-            // app.use(express.bodyParser());
+            app.use(express.bodyParser());
             // app.use(express.methodOverride());
             app.use(app.router);
             // app.use(express.static(path.join(__dirname, 'public')));
@@ -188,6 +189,53 @@ var MinerBug = Class.extend(Obj, {
         app.configure('development', function(){
             app.use(express.errorHandler());
         });
+
+        // Routes
+        //-------------------------------------------------------------------------------
+
+        this.app.all('/api/*', function(req, res, next){
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "X-Requested-With");
+            res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+            res.header("Access-Control-Allow-Headers", "Content-Type");
+            next();
+        });
+
+        // endpoint for new project submission
+        // TODO: convert to post
+        this.app.get('/api/project/register', function(req, res) {
+            var foo = {
+                "success": true
+            }
+            res.json(foo);
+            //res.status(200);
+            //res.end();
+        });
+
+        /*
+        this.app.post('/api/split-test-session/establish', function(req, res) {
+            //TEST
+            console.log("api split test session establish call received");
+            console.dir(req.body);
+
+            var data = req.body;
+            SplitTestSessionApi.establishSplitTestSession(data.userUuid, function(error, splitTestSession) {
+                if (!error) {
+                    res.header("Content-Type", "application/json");
+                    res.status(200);
+                    res.write(JSON.stringify({splitTestSession: splitTestSession.toObject()}));
+                    res.end();
+                } else {
+                    console.error("An error occurred while trying to establish a split test session.", error);
+                    console.error(error.stack);
+                    res.header("Content-Type", "application/json");
+                    res.status(500);
+                    res.write(JSON.stringify({error: "An error occurred while trying to establish a split test session"}));
+                    res.end();
+                }
+            })
+        });
+        */
 
         callback();
     }
