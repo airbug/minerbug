@@ -41,9 +41,14 @@ buildProperties({
             version: "0.0.1",
             //main: "./lib/minerbug-module.js",
             dependencies: {
-                bugpack: "https://s3.amazonaws.com/airbug/bugpack-0.0.5.tgz"
+                bugpack: "https://s3.amazonaws.com/airbug/bugpack-0.0.5.tgz",
+                "express": "3.1.x",
+                "fstream": '0.1.x',
+                "socket.io": "0.9.x"
             },
-            scripts: {}
+            scripts: {
+                "start": "node ./scripts/minerbug-server-start.js"
+            }
         },
         sourcePaths: [
             "./projects/minerbug/js/src",
@@ -56,6 +61,7 @@ buildProperties({
             "../bugunit/projects/bugunit/js/src"
         ],
         scriptPaths: [
+            "./projects/minerbug/js/scripts",
             "../bugunit/projects/bugunit/js/scripts"
         ],
         testPaths: [
