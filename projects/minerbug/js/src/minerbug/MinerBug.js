@@ -140,7 +140,7 @@ var MinerBug = Class.extend(Obj, {
     configure: function(callback){
         var _this = this;
         this.app = express();
-        this.server = http.createServer(app);
+        this.server = http.createServer(this.app);
 
          /*
          this.enableSockets(server, function(){
@@ -158,7 +158,7 @@ var MinerBug = Class.extend(Obj, {
             _this.app.use(express.bodyParser());
             _this.app.use(express.methodOverride());
             _this.app.use(express.static(path.resolve(__dirname, '../static')));
-            _this.app.use(app.router);
+            _this.app.use(_this.app.router);
         });
 
         this.app.configure('development', function(){
