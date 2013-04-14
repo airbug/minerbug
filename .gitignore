@@ -15,10 +15,11 @@ results
 node_modules
 npm-debug.log
 
-# IntelliJ resources
+# IntelliJ/JetBrain resources
 *.iml
 *.ipr
 *.iws
+*.idea
 
 #mac
 .DS_Store
