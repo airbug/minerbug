@@ -151,13 +151,13 @@ var MinerBug = Class.extend(Obj, {
         this.app.configure(function(){
             _this.app.engine('mustache', mu2Express.engine);
             _this.app.set('view engine', 'mustache');
-            _this.app.set('views', path.resolve(__dirname, '../resources/views'));
+            _this.app.set('views', path.resolve(__dirname, '../../resources/views'));
 
             _this.app.set('port', process.env.PORT || 8000);
             _this.app.use(express.logger('dev'));
             _this.app.use(express.bodyParser());
             _this.app.use(express.methodOverride());
-            _this.app.use(express.static(path.resolve(__dirname, '../static')));
+            _this.app.use(express.static(path.resolve(__dirname, '../../static')));
             _this.app.use(_this.app.router);
         });
 
