@@ -185,7 +185,8 @@ var MinerBug = Class.extend(Obj, {
 
         // endpoint for new project submission
         // TODO: convert to post
-        this.app.get('/api/project/register', function(req, res) {
+        this.app.post('/api/job/register', function(req, res) {
+            console.log(req.body);
             var foo = {
                 "success": true
             };
