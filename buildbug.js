@@ -9,25 +9,25 @@ var buildbug = require('buildbug');
 // Simplify References
 //-------------------------------------------------------------------------------
 
-var buildProject = buildbug.buildProject;
+var buildProject    = buildbug.buildProject;
 var buildProperties = buildbug.buildProperties;
-var buildTarget = buildbug.buildTarget;
-var buildTask = buildbug.buildTask;
-var enableModule = buildbug.enableModule;
-var parallel = buildbug.parallel;
-var series = buildbug.series;
-var targetTask = buildbug.targetTask;
+var buildTarget     = buildbug.buildTarget;
+var buildTask       = buildbug.buildTask;
+var enableModule    = buildbug.enableModule;
+var parallel        = buildbug.parallel;
+var series          = buildbug.series;
+var targetTask      = buildbug.targetTask;
 
 
 //-------------------------------------------------------------------------------
 // Enable Modules
 //-------------------------------------------------------------------------------
 
-var aws = enableModule("aws");
-var bugpack = enableModule('bugpack');
-var bugunit = enableModule('bugunit');
-var core = enableModule('core');
-var nodejs = enableModule('nodejs');
+var aws             = enableModule("aws");
+var bugpack         = enableModule('bugpack');
+var bugunit         = enableModule('bugunit');
+var core            = enableModule('core');
+var nodejs          = enableModule('nodejs');
 
 
 //-------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ buildTarget('local').buildFlow(
                     packageJson: buildProject.getProperty("minerbug.packageJson"),
                     sourcePaths: buildProject.getProperty("minerbug.sourcePaths"),
                     scriptPaths: buildProject.getProperty("minerbug.scriptPaths"),
-                    testPaths: buildProject.getProperty("minerbug.testPaths")
+                    testPaths:   buildProject.getProperty("minerbug.testPaths")
                 }
             }),
             targetTask('generateBugPackRegistry', {
@@ -123,7 +123,7 @@ buildTarget('local').buildFlow(
             }),
             targetTask('packNodePackage', {
                 properties: {
-                    packageName: buildProject.getProperty("minerbug.packageJson.name"),
+                    packageName:    buildProject.getProperty("minerbug.packageJson.name"),
                     packageVersion: buildProject.getProperty("minerbug.packageJson.version")
                 }
             }),
