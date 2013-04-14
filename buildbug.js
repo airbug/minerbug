@@ -41,9 +41,10 @@ buildProperties({
             version: "0.0.1",
             //main: "./lib/minerbug-module.js",
             dependencies: {
-                bugpack: "https://s3.amazonaws.com/airbug/bugpack-0.0.5.tgz",
+                "bugpack": "https://s3.amazonaws.com/airbug/bugpack-0.0.5.tgz",
                 "express": "3.1.x",
                 "fstream": '0.1.x',
+                "mu2express": "0.0.x",
                 "socket.io": "0.9.x"
             },
             scripts: {
@@ -66,6 +67,18 @@ buildProperties({
         ],
         testPaths: [
             "../bugjs/projects/bugjs/js/test"
+        ],
+        resourcePaths: [
+            "./projects/minerbug/resources"
+        ],
+        staticPaths: [
+            "./projects/minerbug/static",
+            "../bugjs/external/bootstrap/js/src",
+            "../bugjs/external/bootstrap/static",
+            "../bugjs/external/jquery/js/src",
+            "../bugjs/external/mustache/js/src",
+            "../bugjs/projects/bugjs/js/src",
+            '../bugpack/projects/bugpack-client/js/src'
         ]
     }
 });
