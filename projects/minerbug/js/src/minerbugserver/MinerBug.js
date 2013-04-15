@@ -8,7 +8,9 @@
 
 //@Require('Class')
 //@Require('Obj')
+//@Require('Queue')
 //@Require('bugflow.BugFlow')
+//@Require('minerbug.Job')
 
 
 //-------------------------------------------------------------------------------
@@ -31,6 +33,8 @@ var path            = require('path');
 var Class   = bugpack.require('Class');
 var Obj     = bugpack.require('Obj');
 var BugFlow = bugpack.require('bugflow.BugFlow');
+var Queue = bugpack.require('Queue');
+var Job = bugpack.require('minerbug.Job');
 
 
 //-------------------------------------------------------------------------------
@@ -144,6 +148,9 @@ var MinerBug = Class.extend(Obj, {
         this.app = express();
         this.server = http.createServer(this.app);
 
+        // temp job queue object
+        this.app.set('jobQueue', new Queue());
+
          /*
          this.enableSockets(server, function(){
             console.log("SonarBug sockets enabled");
@@ -192,11 +199,13 @@ var MinerBug = Class.extend(Obj, {
 
             // add the contents to a job manager which then will read in the file and break the job into tasks when ready
 
-            var job = req.body;
-            console.log("job", job);
-            if (req.body.jobFiles) {
+            var jobQueue = _this.app.get('jobQueue');
 
-            }
+
+            jobQueue.add(new Job(req.body));
+            console.log("jobQueue count after add", jobQueue.getCount(), jobQueue.getValueArray());
+
+
             var foo = {
                 "success": true
             };

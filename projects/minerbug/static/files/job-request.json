@@ -1,4 +1,6 @@
 {
+    "customer": "a@a.com",
+    "name": "word count",
     "sources": [
         {
             "url": "http://localhost:8000/files/job1.txt"
@@ -10,12 +12,21 @@
     "tasks": [
         {
             "type": "map",
-            "definition": "
+            "source": "
                 function (data) {
 
-                    console.log('def', data);
+                    console.log('mapper', data);
                 }
                 "
+        },
+        {
+            "type": "map",
+            "source": "
+                function (data) {
+
+                    console.log('reducer', data);
+                }
+            "
         }
     ]
 }
