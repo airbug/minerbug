@@ -4,11 +4,10 @@
 
 //@Package('minerbug')
 
-//@Export('Task')
+//@Export('TaskRunner')
 
 //@Require('Class')
 //@Require('Obj')
-//@Require('TypeUtil')
 
 
 //-------------------------------------------------------------------------------
@@ -24,20 +23,19 @@ var bugpack = require('bugpack').context();
 
 var Class =     bugpack.require('Class');
 var Obj =       bugpack.require('Obj');
-var TypeUtil =  bugpack.require('TypeUtil');
 
 
 //-------------------------------------------------------------------------------
 // Declare Class
 //-------------------------------------------------------------------------------
 
-var Task = Class.extend(Obj, {
+var TaskRunner = Class.extend(Obj, {
 
     //-------------------------------------------------------------------------------
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function(taskObject) {
+    _constructor: function(task) {
 
         this._super();
 
@@ -48,44 +46,15 @@ var Task = Class.extend(Obj, {
 
         /**
          * @private
-         * @type {string}
+         * @type {Task}
          */
-        this.source = "";
-
-        /**
-         * @private
-         * @type {string}
-         */
-        this.type = "";
-
-        if (taskObject) {
-            if (TypeUtil.isString(taskObject.type)) {
-                this.type = taskObject.type;
-            }
-            if (TypeUtil.isString(taskObject.source)) {
-                this.source = taskObject.source;
-            }
-        }
+        this.task = task;
     },
 
 
     //-------------------------------------------------------------------------------
     // Getters and Setters
     //-------------------------------------------------------------------------------
-
-    /**
-     * @return {string}
-     */
-    getSource: function() {
-        return this.source;
-    },
-
-    /**
-     * @return {string}
-     */
-    getType: function() {
-        return this.type;
-    },
 
 
     //-------------------------------------------------------------------------------
@@ -95,19 +64,13 @@ var Task = Class.extend(Obj, {
     /**
      *
      */
-    execute: function(data) {
-        var method = eval(this.source);
-        var results = method(data);
-        return results;
-    },
-
-    /**
-     * @return {Object}
-     */
-    toObject: function() {
-        return {
-            source: this.source,
-            type: this.type
+    runTask: function(data, callback) {
+        //TODO BRN: If we want to break this out in to workers then we can do this here.
+        try {
+            var results = this.task.execute(data);
+            callback(null, results);
+        } catch (error) {
+            callback(error);
         }
     }
 });
@@ -117,4 +80,4 @@ var Task = Class.extend(Obj, {
 // Export
 //-------------------------------------------------------------------------------
 
-bugpack.export('minerbug.Task', Task);
+bugpack.export('minerbug.TaskRunner', TaskRunner);

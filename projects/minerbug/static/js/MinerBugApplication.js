@@ -9,6 +9,7 @@
 
 //@Require('Class')
 //@Require('Obj')
+//@Require('minerbug.TaskRunner')
 
 
 //-------------------------------------------------------------------------------
@@ -24,6 +25,7 @@ var bugpack = require('bugpack').context();
 
 var Class =             bugpack.require('Class');
 var Obj =               bugpack.require('Obj');
+var TaskRunner =        bugpack.require('minerbug.TaskRunner');
 
 
 //-------------------------------------------------------------------------------
@@ -58,6 +60,20 @@ var MinerBugApplication = Class.extend(Obj, {
     start: function() {
         //TEST
         console.log("MinerBugApplication started");
+    },
+
+
+    //-------------------------------------------------------------------------------
+    // Private Class Methods
+    //-------------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {Task} task
+     */
+    runTask: function(task, data, callback) {
+        var taskRunner = new TaskRunner(task);
+        taskRunner.runTask(data, callback);
     }
 });
 
