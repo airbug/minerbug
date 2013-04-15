@@ -155,6 +155,7 @@ var MinerBug = Class.extend(Obj, {
             _this.app.set('view engine', 'mustache');
             _this.app.set('views', path.resolve(__dirname, '../../resources/views'));
 
+            _this.app.set('root', __dirname);
             _this.app.set('port', process.env.PORT || 8000);
             _this.app.use(express.logger('dev'));
             _this.app.use(express.bodyParser());
@@ -185,10 +186,17 @@ var MinerBug = Class.extend(Obj, {
             next();
         });
 
-        // endpoint for new project submission
-        // TODO: convert to post
+        // endpoint for new job submission
+        // read in the list of job files, save them to disk
         this.app.post('/api/job/register', function(req, res) {
-            console.log(req.body);
+
+            // add the contents to a job manager which then will read in the file and break the job into tasks when ready
+
+            var job = req.body;
+            console.log("job", job);
+            if (req.body.jobFiles) {
+
+            }
             var foo = {
                 "success": true
             };
