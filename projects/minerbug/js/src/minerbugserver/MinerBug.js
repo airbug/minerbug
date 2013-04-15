@@ -30,11 +30,12 @@ var path            = require('path');
 // BugPack Modules
 //-------------------------------------------------------------------------------
 
-var Class   = bugpack.require('Class');
-var Obj     = bugpack.require('Obj');
-var BugFlow = bugpack.require('bugflow.BugFlow');
-var Queue = bugpack.require('Queue');
-var Job = bugpack.require('minerbug.Job');
+var Class           = bugpack.require('Class');
+var Obj             = bugpack.require('Obj');
+var BugFlow         = bugpack.require('bugflow.BugFlow');
+var Job             = bugpack.require('minerbug.Job');
+var Queue           = bugpack.require('Queue');
+var WorkAssignment  = bugpack.require('minerbug.WorkAssignment');
 
 
 //-------------------------------------------------------------------------------
@@ -153,7 +154,7 @@ var MinerBug = Class.extend(Obj, {
 
          /*
          this.enableSockets(server, function(){
-            console.log("SonarBug sockets enabled");
+            console.log("MinerBug sockets enabled");
          });
          */
 
@@ -229,6 +230,58 @@ var MinerBug = Class.extend(Obj, {
         });
 
         callback();
+    },
+
+    enableSockets: function(server, callback){
+        var _this                       = this;
+        var supplierSocketManager       = io.listen(server);
+        var workerSocketManager         = io.listen(server);
+
+        workerSocketManager.set('match origin protocol', true); //NOTE: Only necessary for use with wss, WebSocket Secure protocol
+        workerSocketManager.set('resource', '/socket-api'); //NOTE: forward slash is required here unlike client setting
+        workerSocketManager.of('/worker');
+        workerSocketManager.sockets.on('connection', function (socket) {
+            //register worker
+
+            socket.on('readyForWork', function(data){
+                //assign work
+                // var workAssignment = new WorkAssignment(task, data); //task type and source and data payload
+                // socket.emit('', workAssignment);
+            });
+
+            socket.on('workStarted', function(data){
+                
+            });
+
+            socket.on('workProgress', function(data){
+                
+            });
+
+            socket.on('workError', function(data){
+                
+            });
+
+            socket.on('workCompleted', function(data){
+                
+            });
+
+            socket.on('error', function(reason){
+                console.log('Socket Error:', reason);
+            });
+
+            socket.on('disconnect', function(){
+                if(){
+                    
+                }
+            })
+        });
+
+        supplierSocketManager.set('match origin protocol', true); //NOTE: Only necessary for use with wss, WebSocket Secure protocol
+        supplierSocketManager.set('resource', '/socket-api'); //NOTE: forward slash is required here unlike client setting
+        supplierSocketManager.of('/supplier');
+        supplierSocketManager.sockets.on('connection', function (socket) {
+
+        });
     }
 });
 
