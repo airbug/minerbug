@@ -8,6 +8,8 @@
 
 //@Require('Class')
 //@Require('Obj')
+//@Require('bugflow.BugFlow')
+
 
 //-------------------------------------------------------------------------------
 // Common Modules
@@ -15,7 +17,7 @@
 
 var bugpack         = require('bugpack').context();
 var express         = require('express');
-var mu2Express      = require("mu2Express");
+var mu2Express      = require("mu2express");
 var fs              = require('fs');
 var http            = require('http');
 var io              = require('socket.io');
@@ -194,6 +196,9 @@ var MinerBug = Class.extend(Obj, {
             //res.status(200);
             //res.end();
         });
+
+
+
 
         // Shut Down
         //-------------------------------------------------------------------------------
