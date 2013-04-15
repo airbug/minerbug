@@ -30,6 +30,7 @@ buildbug.json
 
 # package descriptions
 temp
+tmp
 
 # config files
 config

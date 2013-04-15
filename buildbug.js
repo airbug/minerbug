@@ -2,7 +2,10 @@
 // Requires
 //-------------------------------------------------------------------------------
 
-var buildbug = require('buildbug');
+var buildbug        = require('buildbug');
+var fs              = require('fs');
+var path            = require('path');
+var zlib            = require('zlib');
 
 
 //-------------------------------------------------------------------------------
@@ -80,23 +83,112 @@ buildProperties({
             "../bugjs/projects/bugjs/js/src",
             '../bugpack/projects/bugpack-client/js/src'
         ]
+    },
+    testfile: {
+        testFile: path.resolve(__dirname + '/projects/minerbug/tmp/testfile.txt')
     }
 });
 
 
 //-------------------------------------------------------------------------------
-// Declare Tasks
+// Declare Local Tasks
 //-------------------------------------------------------------------------------
 
+    //-------------------------------------------------------------------------------
+    // Declare TestFile Properties
+    //-------------------------------------------------------------------------------
+TestFileProperties = {
+    testFile: path.resolve(__dirname + '/projects/minerbug/js/testfile.txt'),
+    seedFile: path.resolve(__dirname + '/projects/minerbug/js/seed/ipsumlorem.txt'),
+    seedFileEncoding: 'utf8',
+    maxTestFileSize: 104857600 //100MB
+};
+
+buildTask('createTestFile', function(flow, buildProject, properties){
+    var props               = TestFileProperties;
+    var testFile            = props.testFile;                                   // props.getProperty("testFile");
+    var seedFile            = props.seedFile;                                   // props.getProperty("seedFile");
+    var seedFileEncoding    = props.seedFileEncoding;                           // props.getProperty("seedFileEncoding") || null;
+    var seedData            = fs.readFileSync(seedFile, seedFileEncoding);
+    var seedFileSize        = fs.statSync(seedFile).size;
+    var maxTestFileSize     = props.maxTestFileSize;                            // props.getProperty("maxTestFileSize");
+
+    createTestFile(testFile, seedData, seedFileSize, maxTestFileSize, function(error){
+        if(!error){
+            console.log('\ntestFile successfully created');
+            flow.complete();
+        } else {
+            console.log('\ntestFile could not be created');
+            flow.complete(error);
+        }
+    });
+});
+
 buildTask('gzipFile', function(flow, buildProject, properties) {
-    gzipFile(properties, function(error) {
+    // var props       = this.generateProperties(properties); //NOTE: SUNG @BRN Not intuitive. Please consider rewriting;
+    var props       = TestFileProperties;
+    var inputFile   = props.testFile;       // props.getProperty("testFile");
+    var outputFile  = inputFile + '.gz';
+
+    gzipFile(inputFile, outputFile, function(error) {
         flow.complete(error);
     });
 });
 
-function gzipFile(properties) {
-    
-}
+/**
+ * @param {string} inputFile
+ * @param {string} outputFile
+ */
+function gzipFile(inputFile, outputFile, callback) {
+    var gzip = zlib.createGzip();
+    var inp = fs.createReadStream(inputFile);
+    var out = fs.createWriteStream(outputFile);
+
+    inp.pipe(gzip).on('end', callback).pipe(out);
+};
+
+/**
+ * @param {string} testFile
+ * @param {string} seedData
+ * @param {number} seedFileSize
+ * @param {number} maxTestFileSize
+ * @param {function(error)} callback
+ */
+function createTestFile(testFile, seedData, seedFileSize, maxTestFileSize, callback){
+    var validateParameters = function(testFile, seedData, seedFileSize, maxTestFileSize, callback){
+        if( typeof testFile         !== 'string' ||
+            typeof seedData         !== 'string' ||
+            typeof seedFileSize     !== 'number' ||
+            typeof maxTestFileSize  !== 'number' ||
+            typeof callback         !== 'function'){
+            throw new Error('Type Error in parameters');
+        }
+    };
+
+    var createFile = function(testFile, seedData, seedFileSize, maxTestFileSize, callback){
+        var testFileSize = fs.statSync(testFile).size;
+        var percentage = (testFileSize / maxTestFileSize * 100).toString().substring(0,4);
+        process.stdout.write('\r' + percentage + '% complete');
+
+        if(testFileSize > (maxTestFileSize - seedFileSize)){
+            callback();
+        } else {
+            fs.appendFile(testFile, seedData, function(error){
+                if(!error){
+                    createFile(testFile, seedData, seedFileSize, maxTestFileSize, callback)
+                } else {
+                    callback(error);
+                }
+            });
+        }
+    };
+
+    if(!fs.existsSync(testFile)){
+        fs.writeFileSync(testFile);
+    }
+    validateParameters(testFile, seedData, seedFileSize, maxTestFileSize, callback);
+    createFile(testFile, seedData, seedFileSize, maxTestFileSize, callback);
+};
 
 //-------------------------------------------------------------------------------
 // Declare Flows
@@ -120,6 +212,64 @@ buildTarget('local').buildFlow(
         // old source files are removed. We should figure out a better way of doing that.
 
         targetTask('clean'),
+           series([
+               targetTask('createNodePackage', {
+                   properties: {
+                       packageJson: buildProject.getProperty("minerbug.packageJson"),
+                       sourcePaths: buildProject.getProperty("minerbug.sourcePaths"),
+                       scriptPaths: buildProject.getProperty("minerbug.scriptPaths"),
+                       testPaths:   buildProject.getProperty("minerbug.testPaths")
+                   }
+               }),
+               targetTask('generateBugPackRegistry', {
+                   init: function(task, buildProject, properties) {
+                       var nodePackage = nodejs.findNodePackage(
+                           buildProject.getProperty("minerbug.packageJson.name"),
+                           buildProject.getProperty("minerbug.packageJson.version")
+                       );
+                       task.updateProperties({
+                           sourceRoot: nodePackage.getBuildPath()
+                       });
+                   }
+               }),
+               targetTask('packNodePackage', {
+                   properties: {
+                       packageName:    buildProject.getProperty("minerbug.packageJson.name"),
+                       packageVersion: buildProject.getProperty("minerbug.packageJson.version")
+                   }
+               }),
+               targetTask('startNodeModuleTests', {
+                   init: function(task, buildProject, properties) {
+                       var packedNodePackage = nodejs.findPackedNodePackage(
+                           buildProject.getProperty("minerbug.packageJson.name"),
+                           buildProject.getProperty("minerbug.packageJson.version")
+                       );
+                       task.updateProperties({
+                           modulePath: packedNodePackage.getFilePath()
+                       });
+                   }
+               }),
+               targetTask("s3EnsureBucket", {
+                   properties: {
+                       bucket: buildProject.getProperty("local-bucket")
+                   }
+               }),
+               targetTask("s3PutFile", {
+                   init: function(task, buildProject, properties) {
+                       var packedNodePackage = nodejs.findPackedNodePackage(buildProject.getProperty("minerbug.packageJson.name"),
+                           buildProject.getProperty("minerbug.packageJson.version"));
+                       task.updateProperties({
+                           file: packedNodePackage.getFilePath(),
+                           options: {
+                               acl: 'public-read'
+                           }
+                       });
+                   },
+                   properties: {
+                       bucket: buildProject.getProperty("local-bucket")
+                   }
+               })
+           ]),
         series([
             targetTask('createNodePackage', {
                 properties: {
@@ -176,26 +326,6 @@ buildTarget('local').buildFlow(
                     });
                 }
             }),*/
-            targetTask("s3EnsureBucket", {
-                properties: {
-                    bucket: buildProject.getProperty("local-bucket")
-                }
-            }),
-            targetTask("s3PutFile", {
-                init: function(task, buildProject, properties) {
-                    var packedNodePackage = nodejs.findPackedNodePackage(buildProject.getProperty("minerbug.packageJson.name"),
-                        buildProject.getProperty("minerbug.packageJson.version"));
-                    task.updateProperties({
-                        file: packedNodePackage.getFilePath(),
-                        options: {
-                            acl: 'public-read'
-                        }
-                    });
-                },
-                properties: {
-                    bucket: buildProject.getProperty("local-bucket")
-                }
-            })
         ])
     ])
 ).makeDefault();
@@ -266,6 +396,45 @@ buildTarget('prod').buildFlow(
                 },
                 properties: {
                     bucket: "airbug"
+                }
+            })
+        ])
+    ])
+);
+
+// TestFile Flow
+//-------------------------------------------------------------------------------
+
+buildTarget('testfile').buildFlow(
+    series([
+
+        // TODO BRN: This "clean" task is temporary until we're not modifying the build so much. This also ensures that
+        // old source files are removed. We should figure out a better way of doing that.
+
+        targetTask('clean'),
+        series([
+            targetTask("createTestFile", {
+        
+            }),
+            targetTask("gzipFile", {
+        
+            }),
+            targetTask("s3EnsureBucket", {
+                properties: {
+                    bucket: buildProject.getProperty("local-bucket")
+                }
+            }),
+            targetTask("s3PutFile", {
+                init: function(task, buildProject, properties) {
+                    task.updateProperties({
+                        file: buildProject.getProperty("testfile.testFile") + '.gz',
+                        options: {
+                            acl: 'public-read'
+                        }
+                    });
+                },
+                properties: {
+                    bucket: buildProject.getProperty("local-bucket")
                 }
             })
         ])
