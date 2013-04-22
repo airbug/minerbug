@@ -80,8 +80,9 @@ buildProperties({
             "../bugjs/external/bootstrap/static",
             "../bugjs/external/jquery/js/src",
             "../bugjs/external/mustache/js/src",
+            "../bugjs/external/socketio/js/src",
             "../bugjs/projects/bugjs/js/src",
-            '../bugpack/projects/bugpack-client/js/src'
+            "../bugpack/projects/bugpack-client/js/src"
         ]
     },
     testfile: {

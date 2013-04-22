@@ -9,7 +9,8 @@
 
 //@Require('Class')
 //@Require('Obj')
-//@Require('minerbug.TaskRunner')
+//@Require('bugflow.BugFlow')
+//@Require('minerbug.MinerBugWorker')
 
 
 //-------------------------------------------------------------------------------
@@ -25,7 +26,18 @@ var bugpack = require('bugpack').context();
 
 var Class =             bugpack.require('Class');
 var Obj =               bugpack.require('Obj');
-var TaskRunner =        bugpack.require('minerbug.TaskRunner');
+var BugFlow =           bugpack.require('bugflow.BugFlow');
+var MinerBugWorker =    bugpack.require('minerbug.MinerBugWorker');
+
+
+//-------------------------------------------------------------------------------
+// Simplify References
+//-------------------------------------------------------------------------------
+
+var $if                 = BugFlow.$if;
+var $series             = BugFlow.$series;
+var $parallel           = BugFlow.$parallel;
+var $task               = BugFlow.$task;
 
 
 //-------------------------------------------------------------------------------
@@ -38,7 +50,7 @@ var MinerBugApplication = Class.extend(Obj, {
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function() {
+    _constructor: function(config) {
 
         this._super();
 
@@ -47,6 +59,11 @@ var MinerBugApplication = Class.extend(Obj, {
         // Declare Variables
         //-------------------------------------------------------------------------------
 
+        /**
+         * @private
+         * @type {MinerBugWorker}
+         */
+        this.currentWorker = null;
     },
 
 
@@ -58,22 +75,70 @@ var MinerBugApplication = Class.extend(Obj, {
      *
      */
     start: function() {
-        //TEST
-        console.log("MinerBugApplication started");
+        var _this = this;
+        $series([
+            $task(function(flow) {
+                _this.configure(function(error) {
+                    flow.complete(error);
+                });
+            }),
+            $task(function(flow) {
+                _this.initialize(function(error) {
+                    flow.complete(error);
+                });
+            })
+        ]).execute(function(error) {
+            if (!error) {
+                //TEST
+                console.log("MinerBugApplication successfully started");
+            } else {
+                console.log("MinerBugApplication encountered an error on startup");
+                console.error(error);
+            }
+        });
     },
 
 
     //-------------------------------------------------------------------------------
     // Private Class Methods
     //-------------------------------------------------------------------------------
+    
+    /**
+     * @private
+     * @param callback
+     */
+    configure: function(callback) {
+        //TODO BRN: Process some config here that's supplied by the server
+        callback();
+    },
 
     /**
      * @private
-     * @param {Task} task
+     * @param callback
      */
-    runTask: function(task, data, callback) {
-        var taskRunner = new TaskRunner(task);
-        taskRunner.runTask(data, callback);
+    initialize: function(callback) {
+        var _this = this;
+        $series([
+            $task(function(flow) {
+                _this.startWorker(function(error) {
+                    flow.complete(error);
+                });
+            })
+        ]).execute(callback);
+    },
+
+    /**
+     * @private
+     * @param {function(Error)} callback
+     */
+    startWorker: function(callback) {
+
+        //TODO BRN: These config values should be pulled from a config object instead of hard coded.
+
+        this.currentWorker = new MinerBugWorker({
+            hostname: "localhost",
+            port: 8000
+        });
     }
 });
 

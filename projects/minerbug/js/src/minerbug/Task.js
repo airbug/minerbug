@@ -96,7 +96,8 @@ var Task = Class.extend(Obj, {
      *
      */
     execute: function(data) {
-        var method = eval(this.source);
+        var method = null;
+        eval("method = " + this.source);
         var results = method(data);
         return results;
     },
