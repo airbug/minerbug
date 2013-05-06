@@ -2,7 +2,7 @@
 // Requires
 //-------------------------------------------------------------------------------
 
-//@Require('minerbug.MinerBug')
+//@Require('minerbug.MinerBugApplication')
 
 //-------------------------------------------------------------------------------
 // Common Modules
@@ -14,11 +14,11 @@ var bugpack = require('bugpack').context(module);
 // BugPack
 //-------------------------------------------------------------------------------
 
-var MinerBug = bugpack.require('minerbug.MinerBug');
+var MinerBugApplication = bugpack.require('minerbug.MinerBugApplication');
 
 //-------------------------------------------------------------------------------
 // Bootstrap
 //-------------------------------------------------------------------------------
 
-var minerbug = new MinerBug();
-minerbug.start();
+var minerBugApplication = new MinerBugApplication();
+minerBugApplication.start();
