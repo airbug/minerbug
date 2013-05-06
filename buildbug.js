@@ -38,9 +38,9 @@ var nodejs          = enableModule('nodejs');
 //-------------------------------------------------------------------------------
 
 buildProperties({
-    minerbug: {
+    minerbugserver: {
         packageJson: {
-            name: "minerbug",
+            name: "minerbugserver",
             version: "0.0.1",
             //main: "./lib/minerbug-module.js",
             dependencies: {
@@ -56,6 +56,7 @@ buildProperties({
         },
         sourcePaths: [
             "./projects/minerbug/js/src",
+            "./projects/minerbugserver/js/src",
             "../bugjs/projects/bugjs/js/src",
             "../bugjs/projects/bugtrace/js/src",
             '../bugjs/projects/bugflow/js/src',
@@ -64,17 +65,17 @@ buildProperties({
             "../bugunit/projects/bugunit/js/src"
         ],
         scriptPaths: [
-            "./projects/minerbug/js/scripts",
+            "./projects/minerbugserver/js/scripts",
             "../bugunit/projects/bugunit/js/scripts"
         ],
         testPaths: [
             "../bugjs/projects/bugjs/js/test"
         ],
         resourcePaths: [
-            "./projects/minerbug/resources"
+            "./projects/minerbugserver/resources"
         ],
         staticPaths: [
-            "./projects/minerbug/static",
+            "./projects/minerbugserver/static",
             "../bugjs/external/bootstrap/js/src",
             "../bugjs/external/bootstrap/static",
             "../bugjs/external/jquery/js/src",
@@ -212,13 +213,32 @@ buildTarget('local').buildFlow(
         // old source files are removed. We should figure out a better way of doing that.
 
         targetTask('clean'),
-           series([
-               targetTask('createNodePackage', {
-                   properties: {
-                       packageJson: buildProject.getProperty("minerbug.packageJson"),
-                       sourcePaths: buildProject.getProperty("minerbug.sourcePaths"),
-                       scriptPaths: buildProject.getProperty("minerbug.scriptPaths"),
-                       testPaths:   buildProject.getProperty("minerbug.testPaths")
+        series([
+           targetTask('createNodePackage', {
+               properties: {
+                   packageJson: buildProject.getProperty("minerbugserver.packageJson"),
+                   sourcePaths: buildProject.getProperty("minerbugserver.sourcePaths"),
+                   scriptPaths: buildProject.getProperty("minerbugserver.scriptPaths"),
+                   testPaths:   buildProject.getProperty("minerbugserver.testPaths"),
+
+
+                   //TODO BRN: This is temporary until we get client js packages working.
+
+                   resourcePaths: buildProject.getProperty("minerbugserver.resourcePaths"),
+                   staticPaths: buildProject.getProperty("minerbugserver.staticPaths")
+               }
+           }),
+           parallel([
+               targetTask('generateBugPackRegistry', {
+                   init: function(task, buildProject, properties) {
+                       var nodePackage = nodejs.findNodePackage(
+                           buildProject.getProperty("minerbugserver.packageJson.name"),
+                           buildProject.getProperty("minerbugserver.packageJson.version")
+                       );
+                       task.updateProperties({
+                           sourceRoot: nodePackage.getBuildPath(),
+                           ignore: ["static"]
+                       });
                    }
                }),
                targetTask('generateBugPackRegistry', {
@@ -228,104 +248,48 @@ buildTarget('local').buildFlow(
                            buildProject.getProperty("minerbug.packageJson.version")
                        );
                        task.updateProperties({
-                           sourceRoot: nodePackage.getBuildPath()
+                           sourceRoot: nodePackage.getBuildPath().getAbsolutePath() + "/static"
                        });
-                   }
-               }),
-               targetTask('packNodePackage', {
-                   properties: {
-                       packageName:    buildProject.getProperty("minerbug.packageJson.name"),
-                       packageVersion: buildProject.getProperty("minerbug.packageJson.version")
-                   }
-               }),
-               targetTask('startNodeModuleTests', {
-                   init: function(task, buildProject, properties) {
-                       var packedNodePackage = nodejs.findPackedNodePackage(
-                           buildProject.getProperty("minerbug.packageJson.name"),
-                           buildProject.getProperty("minerbug.packageJson.version")
-                       );
-                       task.updateProperties({
-                           modulePath: packedNodePackage.getFilePath()
-                       });
-                   }
-               }),
-               targetTask("s3EnsureBucket", {
-                   properties: {
-                       bucket: buildProject.getProperty("local-bucket")
-                   }
-               }),
-               targetTask("s3PutFile", {
-                   init: function(task, buildProject, properties) {
-                       var packedNodePackage = nodejs.findPackedNodePackage(buildProject.getProperty("minerbug.packageJson.name"),
-                           buildProject.getProperty("minerbug.packageJson.version"));
-                       task.updateProperties({
-                           file: packedNodePackage.getFilePath(),
-                           options: {
-                               acl: 'public-read'
-                           }
-                       });
-                   },
-                   properties: {
-                       bucket: buildProject.getProperty("local-bucket")
                    }
                })
            ]),
-        series([
-            targetTask('createNodePackage', {
-                properties: {
-                    packageJson: buildProject.getProperty("minerbug.packageJson"),
-                    sourcePaths: buildProject.getProperty("minerbug.sourcePaths"),
-                    scriptPaths: buildProject.getProperty("minerbug.scriptPaths"),
-                    testPaths:   buildProject.getProperty("minerbug.testPaths"),
-
-                    //TODO BRN: This is temporary until we get client js packages working.
-
-                    resourcePaths: buildProject.getProperty("minerbug.resourcePaths"),
-                    staticPaths: buildProject.getProperty("minerbug.staticPaths")
-                }
-            }),
-            parallel([
-                targetTask('generateBugPackRegistry', {
-                    init: function(task, buildProject, properties) {
-                        var nodePackage = nodejs.findNodePackage(
-                            buildProject.getProperty("minerbug.packageJson.name"),
-                            buildProject.getProperty("minerbug.packageJson.version")
-                        );
-                        task.updateProperties({
-                            sourceRoot: nodePackage.getBuildPath(),
-                            ignore: ["static"]
-                        });
-                    }
-                }),
-                targetTask('generateBugPackRegistry', {
-                    init: function(task, buildProject, properties) {
-                        var nodePackage = nodejs.findNodePackage(
-                            buildProject.getProperty("minerbug.packageJson.name"),
-                            buildProject.getProperty("minerbug.packageJson.version")
-                        );
-                        task.updateProperties({
-                            sourceRoot: nodePackage.getBuildPath().getAbsolutePath() + "/static"
-                        });
-                    }
-                })
-            ]),
-            targetTask('packNodePackage', {
-                properties: {
-                    packageName:    buildProject.getProperty("minerbug.packageJson.name"),
-                    packageVersion: buildProject.getProperty("minerbug.packageJson.version")
-                }
-            }),
-            /*targetTask('startNodeModuleTests', {
-                init: function(task, buildProject, properties) {
-                    var packedNodePackage = nodejs.findPackedNodePackage(
-                        buildProject.getProperty("minerbug.packageJson.name"),
-                        buildProject.getProperty("minerbug.packageJson.version")
-                    );
-                    task.updateProperties({
-                        modulePath: packedNodePackage.getFilePath()
-                    });
-                }
-            }),*/
+           targetTask('packNodePackage', {
+               properties: {
+                   packageName:    buildProject.getProperty("minerbugserver.packageJson.name"),
+                   packageVersion: buildProject.getProperty("minerbugserver.packageJson.version")
+               }
+           }),
+           targetTask('startNodeModuleTests', {
+               init: function(task, buildProject, properties) {
+                   var packedNodePackage = nodejs.findPackedNodePackage(
+                       buildProject.getProperty("minerbugserver.packageJson.name"),
+                       buildProject.getProperty("minerbugserver.packageJson.version")
+                   );
+                   task.updateProperties({
+                       modulePath: packedNodePackage.getFilePath()
+                   });
+               }
+           }),
+           targetTask("s3EnsureBucket", {
+               properties: {
+                   bucket: buildProject.getProperty("local-bucket")
+               }
+           }),
+           targetTask("s3PutFile", {
+               init: function(task, buildProject, properties) {
+                   var packedNodePackage = nodejs.findPackedNodePackage(buildProject.getProperty("minerbugserver.packageJson.name"),
+                       buildProject.getProperty("minerbugserver.packageJson.version"));
+                   task.updateProperties({
+                       file: packedNodePackage.getFilePath(),
+                       options: {
+                           acl: 'public-read'
+                       }
+                   });
+               },
+               properties: {
+                   bucket: buildProject.getProperty("local-bucket")
+               }
+           })
         ])
     ])
 ).makeDefault();
@@ -334,73 +298,6 @@ buildTarget('local').buildFlow(
 // Prod Flow
 //-------------------------------------------------------------------------------
 
-buildTarget('prod').buildFlow(
-    series([
-
-        // TODO BRN: This "clean" task is temporary until we're not modifying the build so much. This also ensures that
-        // old source files are removed. We should figure out a better way of doing that.
-
-        targetTask('clean'),
-        series([
-            targetTask('createNodePackage', {
-                properties: {
-                    packageJson: buildProject.getProperty("minerbug.packageJson"),
-                    sourcePaths: buildProject.getProperty("minerbug.sourcePaths"),
-                    scriptPaths: buildProject.getProperty("minerbug.scriptPaths"),
-                    testPaths: buildProject.getProperty("minerbug.testPaths")
-                }
-            }),
-            targetTask('generateBugPackRegistry', {
-                init: function(task, buildProject, properties) {
-                    var nodePackage = nodejs.findNodePackage(
-                        buildProject.getProperty("minerbug.packageJson.name"),
-                        buildProject.getProperty("minerbug.packageJson.version")
-                    );
-                    task.updateProperties({
-                        sourceRoot: nodePackage.getBuildPath()
-                    });
-                }
-            }),
-            targetTask('packNodePackage', {
-                properties: {
-                    packageName: buildProject.getProperty("minerbug.packageJson.name"),
-                    packageVersion: buildProject.getProperty("minerbug.packageJson.version")
-                }
-            }),
-            targetTask('startNodeModuleTests', {
-                init: function(task, buildProject, properties) {
-                    var packedNodePackage = nodejs.findPackedNodePackage(
-                        buildProject.getProperty("minerbug.packageJson.name"),
-                        buildProject.getProperty("minerbug.packageJson.version")
-                    );
-                    task.updateProperties({
-                        modulePath: packedNodePackage.getFilePath()
-                    });
-                }
-            }),
-            targetTask("s3EnsureBucket", {
-                properties: {
-                    bucket: "airbug"
-                }
-            }),
-            targetTask("s3PutFile", {
-                init: function(task, buildProject, properties) {
-                    var packedNodePackage = nodejs.findPackedNodePackage(buildProject.getProperty("minerbug.packageJson.name"),
-                        buildProject.getProperty("minerbug.packageJson.version"));
-                    task.updateProperties({
-                        file: packedNodePackage.getFilePath(),
-                        options: {
-                            acl: 'public-read'
-                        }
-                    });
-                },
-                properties: {
-                    bucket: "airbug"
-                }
-            })
-        ])
-    ])
-);
 
 // TestFile Flow
 //-------------------------------------------------------------------------------
