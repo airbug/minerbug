@@ -19,6 +19,7 @@
 //@Require('bugioc.PropertyAnnotation')
 //@Require('express.ExpressApp')
 //@Require('express.ExpressServer')
+//@Require('minerbugserver.MinerbugApiController')
 //@Require('minerbugserver.MinerbugWorkerController')
 //@Require('socketio:server.SocketIoManager');
 //@Require('socketio:server.SocketIoServer')
@@ -50,6 +51,7 @@ var ModuleAnnotation            = bugpack.require('bugioc.ModuleAnnotation');
 var PropertyAnnotation          = bugpack.require('bugioc.PropertyAnnotation');
 var ExpressApp                  = bugpack.require('express.ExpressApp');
 var ExpressServer               = bugpack.require('express.ExpressServer');
+var MinerbugApiController       = bugpack.require('minerbugserver.MinerbugApiController');
 var MinerbugWorkerController    = bugpack.require('minerbugserver.MinerbugWorkerController');
 var SocketIoManager             = bugpack.require('socketio:server.SocketIoManager');
 var SocketIoServer              = bugpack.require('socketio:server.SocketIoServer');
@@ -109,9 +111,23 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
 
         /**
          * @private
+         * @type {SocketIoManager}
+         * @private
+         */
+        this._minerbugApiSocketManager = null;
+
+        /**
+         * @private
          * @type {MinerbugWorkerController}
          */
         this._minerbugWorkerController = null;
+
+        /**
+         * @private
+         * @type {SocketIoManager}
+         * @private
+         */
+        this._minerbugWorkerSocketManager = null;
     },
 
 
@@ -153,6 +169,16 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
             }),
             $task(function(flow) {
                 _this._minerbugWorkerController.configure(function(error) {
+                    flow.complete(error);
+                });
+            }),
+            $task(function(flow) {
+                _this._minerbugApiSocketManager.initialize(function(error) {
+                    flow.complete(error);
+                });
+            }),
+            $task(function(flow) {
+                _this._minerbugWorkerSocketManager.initialize(function(error) {
                     flow.complete(error);
                 });
             }),
@@ -199,9 +225,18 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
     },
 
     /**
+     * @param {SocketIoServer} socketIoServer
+     * @return {SocketIoManager}
+     */
+    minerbugApiSocketManager: function(socketIoServer) {
+        this._minerbugApiController = new SocketIoManager(socketIoServer, "/minerbug-api");
+        return this._minerbugApiController;
+    },
+
+    /**
      * @return {MinerbugWorkerController}
      */
-    minerbugServerController: function() {
+    minerbugWorkerController: function() {
         this._minerbugWorkerController = new MinerbugWorkerController();
         return this._minerbugWorkerController;
     },
@@ -210,17 +245,9 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
      * @param {SocketIoServer} socketIoServer
      * @return {SocketIoManager}
      */
-    minerbugApiSocketManager: function(socketIoServer) {
-        this._minerbugApiController =
-        return new SocketIoManager(socketIoServer, "/minerbug-api");
-    },
-
-    /**
-     * @param {SocketIoServer} socketIoServer
-     * @return {SocketIoManager}
-     */
     minerbugWorkerSocketManager: function(socketIoServer) {
-        return new SocketIoManager(socketIoServer, "/minerbug-worker");
+        this._minerbugWorkerSocketManager = new SocketIoManager(socketIoServer, "/minerbug-worker");
+        return this._minerbugWorkerSocketManager;
     },
 
     /**
@@ -260,18 +287,23 @@ annotate(MinerbugServerConfiguration).with(
             .args([
                 arg("expressApp").ref("expressApp")
             ]),
+        module("minerbugApiController")
+            .properties([
+                property("expressApp").ref("expressApp"),
+                property("minerbugApiSocketManager").ref("minerbugApiSocketManager")
+            ]),
         module("minerbugApiSocketManager")
             .args([
                 arg("socketIoServer").ref("socketIoServer")
             ]),
+        module("minerbugWorkerController")
+            .properties([
+                property("expressApp").ref("expressApp"),
+                property("minerbugWorkerSocketManager").ref("minerbugWorkerSocketManager")
+            ]),
         module("minerbugWorkerSocketManager")
             .args([
                 arg("socketIoServer").ref("socketIoServer")
-            ]),
-        module("minerbugServerController")
-            .properties([
-                property("expressApp").ref("expressApp"),
-                property("expressServer").ref("expressServer")
             ]),
         module("socketIoServer").
             args([

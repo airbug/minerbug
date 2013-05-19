@@ -60,7 +60,7 @@ var JobManager = Class.extend(Obj, {
 
     /**
      * @param {*}
-        */
+     */
     addJob: function(job) {
         return this.jobs.add(job);
     }

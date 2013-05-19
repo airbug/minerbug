@@ -63,16 +63,9 @@ var MinerbugWorkerController = Class.extend(Obj, {
 
         /**
          * @private
-         * @type {ExpressServer}
+         * @type {SocketIoManager}
          */
-        this.expressServer = null;
-
-
-        /**
-         * @private
-         * @type {SocketIoServer}
-         */
-        this.socketIoServer = null;
+        this.minerbugWorkerSocketManager = null;
     },
 
 
@@ -97,6 +90,19 @@ var MinerbugWorkerController = Class.extend(Obj, {
         });
 
         //TODO BRN: Add routes for socket server
+
+        /*
+         socket.on('message', function(data){
+
+         });
+
+         socket.on('disconnect', function(){
+
+         });
+
+         socket.on('error', function(reason){
+
+         });*/
 
         callback();
     }

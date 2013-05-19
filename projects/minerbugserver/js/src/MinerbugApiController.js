@@ -1,71 +1,110 @@
-//TODO BRN: Generate a new Visit here, Also gen
+//-------------------------------------------------------------------------------
+// Annotations
+//-------------------------------------------------------------------------------
+
+//@Package('minerbugserver')
+
+//@Export('MinerbugApiController')
+
+//@Require('Class')
+//@Require('Obj')
+//@Require('bugflow.BugFlow')
 
 
-var logFileName = userID + '-' + visitID + '.log';
-var logFilePath = activeFoldersPath + '/' + logFileName;
+//-------------------------------------------------------------------------------
+// Common Modules
+//-------------------------------------------------------------------------------
 
-socket.on('tracklog', function(data){
+var bugpack = require('bugpack').context();
 
-    if (data.eventName === "connect") {
 
+//-------------------------------------------------------------------------------
+// BugPack Modules
+//-------------------------------------------------------------------------------
+
+var Class   = bugpack.require('Class');
+var Obj     = bugpack.require('Obj');
+var BugFlow = bugpack.require('bugflow.BugFlow');
+
+
+//-------------------------------------------------------------------------------
+// Simplify References
+//-------------------------------------------------------------------------------
+
+var $if                 = BugFlow.$if;
+var $series             = BugFlow.$series;
+var $parallel           = BugFlow.$parallel;
+var $task               = BugFlow.$task;
+
+
+//-------------------------------------------------------------------------------
+// Declare Class
+//-------------------------------------------------------------------------------
+
+var MinerbugApiController = Class.extend(Obj, {
+
+    //-------------------------------------------------------------------------------
+    // Constructor
+    //-------------------------------------------------------------------------------
+
+    _constructor: function(){
+
+        this._super();
+
+        //-------------------------------------------------------------------------------
+        // Declare Variables
+        //-------------------------------------------------------------------------------
+
+        /**
+         * @private
+         * @type {ExpressApp}
+         */
+        this.expressApp = null;
+
+        /**
+         * @private
+         * @type {SocketIoManager}
+         */
+        this.minerbugApiSocketManager = null;
+    },
+
+
+    //-------------------------------------------------------------------------------
+    // Public Class Methods
+    //-------------------------------------------------------------------------------
+
+    /**
+     * @param {function()} callback
+     */
+    configure: function(callback){
+        var _this = this;
+
+
+        // Routes
+        //-------------------------------------------------------------------------------
+
+
+        //TODO BRN: Add routes for socket server
+
+        /*
+        socket.on('message', function(data){
+
+        });
+
+        socket.on('disconnect', function(){
+
+        });
+
+        socket.on('error', function(reason){
+
+        });*/
+
+        callback();
     }
-    data.userID = userID;
-    data.visitID = visitID;
-    _this.logsManager.appendToLogFile(logFilePath, data, function(error){
-
-    });
 });
 
-socket.on('disconnect', function(){
-    var logsManager                 = _this.logsManager;
-    var currentCompletedFolderName  = _this.logsManager.currentCompletedFolderName; //BUGBUG
-    var logEventManager             = _this.logsManager.logEventManagers[currentCompletedFolderName];
+//-------------------------------------------------------------------------------
+// Exports
+//-------------------------------------------------------------------------------
 
-    logEventManager.incrementMoveCount(); //Why is logEventManager undefined? it doesn't exist
-
-    var completedUserFolderPath = completedFoldersPath + '/' + currentCompletedFolderName + '/' + userID + '/';
-    var data = {
-        eventName: 'disconnect',
-        userID: userID,
-        visitID: visitID,
-        timestamp: new Date(),
-        data: null
-    };
-
-
-    logsManager.appendToLogFile(logFilePath, data, function(error){
-        if(!error){
-            fs.exists(completedUserFolderPath, function(exists){
-                if(!exists){
-                    fs.mkdir(completedUserFolderPath, 0777, function(error){
-                        if(!error){
-                            logsManager.moveLogFileToCompletedUserFolder(logFilePath, currentCompletedFolderName, completedUserFolderPath, function(error){
-                                if(error){
-                                    console.log(error);
-                                } else {
-                                    console.log("successfully moved log file to completed user folder");
-                                }
-                            });
-                        } else {
-                            console.log(error);
-                        }
-                    });
-                } else {
-                    logsManager.moveLogFileToCompletedUserFolder(logFilePath, currentCompletedFolderName, completedUserFolderPath, function(error){
-                        if(error){
-                            console.log(error);
-                        } else {
-                            console.log("successfully moved log file to completed user folder");
-                        }
-                    });
-                }
-            });
-        } else {
-            console.log(error);
-        }
-    });
-});
-
-socket.on('error', function(reason){
-    console.log('Error:', reason, "userID:", userID, "visitID:", visitID);
-});
+bugpack.export('minerbugserver.MinerbugApiController', MinerbugApiController);
