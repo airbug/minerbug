@@ -2,15 +2,13 @@
 // Annotations
 //-------------------------------------------------------------------------------
 
-//@Package('minerbug')
+//@Package('minerbugserver')
 
-//@Export('MinerBugApplication')
-//@Autoload
+//@Export('MinerbugWorkerController')
 
 //@Require('Class')
 //@Require('Obj')
 //@Require('bugflow.BugFlow')
-//@Require('minerbug.MinerBugWorker')
 
 
 //-------------------------------------------------------------------------------
@@ -21,13 +19,12 @@ var bugpack = require('bugpack').context();
 
 
 //-------------------------------------------------------------------------------
-// BugPack
+// BugPack Modules
 //-------------------------------------------------------------------------------
 
-var Class =             bugpack.require('Class');
-var Obj =               bugpack.require('Obj');
-var BugFlow =           bugpack.require('bugflow.BugFlow');
-var MinerBugWorker =    bugpack.require('minerbug.MinerBugWorker');
+var Class   = bugpack.require('Class');
+var Obj     = bugpack.require('Obj');
+var BugFlow = bugpack.require('bugflow.BugFlow');
 
 
 //-------------------------------------------------------------------------------
@@ -44,16 +41,15 @@ var $task               = BugFlow.$task;
 // Declare Class
 //-------------------------------------------------------------------------------
 
-var MinerBugApplication = Class.extend(Obj, {
+var MinerbugWorkerController = Class.extend(Obj, {
 
     //-------------------------------------------------------------------------------
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function(config) {
+    _constructor: function(){
 
         this._super();
-
 
         //-------------------------------------------------------------------------------
         // Declare Variables
@@ -61,90 +57,85 @@ var MinerBugApplication = Class.extend(Obj, {
 
         /**
          * @private
-         * @type {MinerBugWorker}
+         * @type {ExpressApp}
          */
-        this.currentWorker = null;
+        this.expressApp = null;
+
+        /**
+         * @private
+         * @type {ExpressServer}
+         */
+        this.expressServer = null;
+
+
+        /**
+         * @private
+         * @type {SocketIoServer}
+         */
+        this.socketIoServer = null;
     },
 
 
     //-------------------------------------------------------------------------------
-    // Class Methods
+    // Public Class Methods
     //-------------------------------------------------------------------------------
 
     /**
      *
      */
-    start: function() {
+    start: function (callback) {
         var _this = this;
         $series([
             $task(function(flow) {
                 _this.configure(function(error) {
-                    flow.complete(error);
+                    if (!error) {
+                        flow.complete();
+                    } else {
+                        flow.error(error);
+                    }
                 });
             }),
-            $task(function(flow) {
-                _this.initialize(function(error) {
-                    flow.complete(error);
-                });
+            $task(function(flow){
+                _this.initialize(function(error){
+                    if (!error){
+                        flow.complete();
+                    } else {
+                        flow.error(error);
+                    }
+                })
             })
-        ]).execute(function(error) {
-            if (!error) {
-                //TEST
-                console.log("MinerBugApplication successfully started");
-            } else {
-                console.log("MinerBugApplication encountered an error on startup");
-                console.error(error);
-            }
-        });
+        ]).execute(callback);
     },
 
 
     //-------------------------------------------------------------------------------
     // Private Class Methods
     //-------------------------------------------------------------------------------
-    
-    /**
-     * @private
-     * @param callback
-     */
-    configure: function(callback) {
-        //TODO BRN: Process some config here that's supplied by the server
-        callback();
-    },
 
     /**
-     * @private
-     * @param callback
+     * @param {function()} callback
      */
-    initialize: function(callback) {
+    configure: function(callback){
         var _this = this;
-        $series([
-            $task(function(flow) {
-                _this.startWorker(function(error) {
-                    flow.complete(error);
-                });
-            })
-        ]).execute(callback);
-    },
 
-    /**
-     * @private
-     * @param {function(Error)} callback
-     */
-    startWorker: function(callback) {
 
-        //TODO BRN: These config values should be pulled from a config object instead of hard coded.
+        // Routes
+        //-------------------------------------------------------------------------------
 
-        this.currentWorker = new MinerBugWorker({
-            hostname: "localhost",
-            port: 8000
+        this.expressApp.get('/', function(req, res) {
+            res.render('minerbug', {
+                title: 'minerbug'
+            });
         });
+
+        //TODO BRN: Add routes for socket server
+
+        callback();
     }
 });
-
 
 //-------------------------------------------------------------------------------
 // Exports
 //-------------------------------------------------------------------------------
 
-bugpack.export("minerbug.MinerBugApplication", MinerBugApplication);
+bugpack.export('minerbugserver.MinerbugWorkerController', MinerbugWorkerController);

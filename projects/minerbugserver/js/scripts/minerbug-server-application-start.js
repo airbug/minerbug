@@ -2,7 +2,8 @@
 // Requires
 //-------------------------------------------------------------------------------
 
-//@Require('minerbug.MinerBugApplication')
+//@Require('minerbug.MinerbugApplication')
+
 
 //-------------------------------------------------------------------------------
 // Common Modules
@@ -10,15 +11,26 @@
 
 var bugpack = require('bugpack').context(module);
 
+
 //-------------------------------------------------------------------------------
 // BugPack
 //-------------------------------------------------------------------------------
 
-var MinerBugApplication = bugpack.require('minerbug.MinerBugApplication');
+var MinerbugServerApplication = bugpack.require('minerbugserver.MinerbugServerApplication');
+
 
 //-------------------------------------------------------------------------------
 // Bootstrap
 //-------------------------------------------------------------------------------
 
-var minerBugApplication = new MinerBugApplication();
-minerBugApplication.start();
+var minerbugServerApplication = new MinerbugServerApplication();
+minerbugServerApplication.start(function(error){
+    console.log("Starting minerbug server...");
+    if (!error){
+        console.log("Minerbug successfully started");
+    } else {
+        console.error(error);
+        console.error(error.stack);
+        process.exit(1);
+    }
+});

@@ -2,12 +2,14 @@
 // Annotations
 //-------------------------------------------------------------------------------
 
-//@Package('minerbug')
+//@Package('minerbugworker')
 
-//@Export('MinerBugApi')
+//@Export('MinerbugWorkerApplication')
+//@Autoload
 
 //@Require('Class')
 //@Require('Obj')
+//@Require('bugioc.ConfigurationScan')
 
 
 //-------------------------------------------------------------------------------
@@ -21,15 +23,16 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var Class =     bugpack.require('Class');
-var Obj =       bugpack.require('Obj');
+var Class =             bugpack.require('Class');
+var Obj =               bugpack.require('Obj');
+var ConfigurationScan =           bugpack.require('bugioc.ConfigurationScan');
 
 
 //-------------------------------------------------------------------------------
 // Declare Class
 //-------------------------------------------------------------------------------
 
-var MinerBugApi = Class.extend(Obj, {
+var MinerbugWorkerApplication = Class.extend(Obj, {
 
     //-------------------------------------------------------------------------------
     // Constructor
@@ -39,21 +42,34 @@ var MinerBugApi = Class.extend(Obj, {
 
         this._super();
 
+
         //-------------------------------------------------------------------------------
         // Declare Variables
         //-------------------------------------------------------------------------------
 
-
+        /**
+         * @private
+         * @type {ConfigurationScan}
+         */
+        this.configurationScan = new ConfigurationScan();
     },
 
-    mapReduce: function(sources) {
-        return new MapReduceCall(sources);
+
+    //-------------------------------------------------------------------------------
+    // Class Methods
+    //-------------------------------------------------------------------------------
+
+    /**
+     * @param {function(Error)}
+        */
+    start: function(callback) {
+        this.configurationScan.scan(callback);
     }
 });
 
 
 //-------------------------------------------------------------------------------
-// Export
+// Exports
 //-------------------------------------------------------------------------------
 
-bugpack.export('minerbug.MinerBugApi', MinerBugApi);
+bugpack.export("minerbugworker.MinerbugWorkerApplication", MinerbugWorkerApplication);

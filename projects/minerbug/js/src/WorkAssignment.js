@@ -4,11 +4,12 @@
 
 //@Package('minerbug')
 
-//@Export('Job')
+//@Export('WorkAssignment')
 
 //@Require('Class')
 //@Require('Obj')
-//@Require('TypeUtil')
+//@Require('minerbug.MapTask')
+//@Require('minerbug.ReduceTask')
 
 
 //-------------------------------------------------------------------------------
@@ -22,24 +23,32 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var Class =     bugpack.require('Class');
-var Obj =       bugpack.require('Obj');
-var TypeUtil =  bugpack.require('TypeUtil');
-var Queue =  bugpack.require('Queue');
+var Class       = bugpack.require('Class');
+var Obj         = bugpack.require('Obj');
+var MapTask     = bugpack.require('minerbug.MapTask');
+var ReduceTask  = bugpack.require('minerbug.ReduceTask');
 
 
 //-------------------------------------------------------------------------------
 // Declare Class
 //-------------------------------------------------------------------------------
 
-var Job = Class.extend(Obj, {
+var WorkAssignment = Class.extend(Obj, {
 
     //-------------------------------------------------------------------------------
     // Constructor
     //-------------------------------------------------------------------------------
+    /**
+     * @param {{
+     *      task: {
+     *          source: string,
+     *          type: string
+     *      },
+     *      data: {*}
+     * }} workAssignmentObject
+     */
+    _constructor: function(workAssignmentObject) {
 
-    _constructor: function(jobObject) {
-        var _this = this;
         this._super();
 
 
@@ -49,43 +58,26 @@ var Job = Class.extend(Obj, {
 
         /**
          * @private
-         * @type {string}
+         * @type {{*}}
          */
-        this.customer = "";
+        this.data = null;
 
         /**
          * @private
-         * @type {string}
+         * @type {Task}
          */
-        this.name = "";
+        this.task = null;
 
-        /**
-         * @private
-         * @type {array}
-         */
-        this.sources = [];
-
-        /**
-         * @private
-         * @type {array}
-         */
-        this.tasks = new Queue();
-
-        if (jobObject) {
-            if (TypeUtil.isString(jobObject.customer)) {
-                this.customer = jobObject.customer;
+        if (workAssignmentObject) {
+            var task = workAssignmentObject.task;
+            if (task.type === "map") {
+                this.task = new MapTask(task);
+            } else if (task.type === "reduce") {
+                this.task = new ReduceTask(task);
+            } else {
+                throw new Error("Unknown task type '" + task.type + "'");
             }
-            if (TypeUtil.isString(jobObject.name)) {
-                this.name = jobObject.name;
-            }
-            if (TypeUtil.isArray(jobObject.sources)) {
-                this.sources = jobObject.sources;
-            }
-            if (TypeUtil.isArray(jobObject.tasks)) {
-                jobObject.tasks.forEach(function(task){
-                    _this.tasks.add(task);
-                });
-            }
+            this.data = workAssignmentObject.data;
         }
     },
 
@@ -94,47 +86,30 @@ var Job = Class.extend(Obj, {
     // Getters and Setters
     //-------------------------------------------------------------------------------
 
+
     /**
-     * @return {string}
+     * @return {{*}}
      */
-    getSource: function() {
-        return this.customer;
+    getData: function(){
+        return this.data;
     },
 
     /**
-     * @return {string}
+     * @return {Task}
      */
-    getType: function() {
-        return this.name;
+    getTask: function(){
+        return this.task;
     },
 
-    /**
-     * @return {array}
-     */
-    getSources: function() {
-        return this.sources;
-    },
-
-    /**
-     * @return {array}
-     */
-    getTasks: function() {
-        return this.tasks;
-    },
 
     //-------------------------------------------------------------------------------
     // Class Methods
     //-------------------------------------------------------------------------------
 
-    /**
-     * @return {Object}
-     */
-    toObject: function() {
+    toObject: function(){
         return {
-            customer: this.customer,
-            name: this.name,
-            sources: this.sources,
-            tasks: this.tasks
+            task: this.task.toObject,
+            data: this.data
         }
     }
 });
@@ -144,4 +119,4 @@ var Job = Class.extend(Obj, {
 // Export
 //-------------------------------------------------------------------------------
 
-bugpack.export('minerbug.Job', Job);
+bugpack.export('minerbug.WorkAssignment', WorkAssignment);

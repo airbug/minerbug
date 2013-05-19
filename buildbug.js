@@ -57,12 +57,12 @@ buildProperties({
         sourcePaths: [
             "./projects/minerbug/js/src",
             "./projects/minerbugserver/js/src",
-            "../bugjs/projects/bugjs/js/src",
-            "../bugjs/projects/bugtrace/js/src",
+            "../bugjs/projects/annotate/js/src",
             '../bugjs/projects/bugflow/js/src',
             "../bugjs/projects/bugfs/js/src",
-            '../bugjs/projects/bugioc/js/src',
-            "../bugjs/projects/annotate/js/src",
+            "../bugjs/projects/bugioc/js/src",
+            "../bugjs/projects/bugjs/js/src",
+            "../bugjs/projects/bugtrace/js/src",
             "../bugunit/projects/bugunit/js/src"
         ],
         scriptPaths: [
@@ -70,7 +70,10 @@ buildProperties({
             "../bugunit/projects/bugunit/js/scripts"
         ],
         testPaths: [
-            "../bugjs/projects/bugjs/js/test"
+            "../bugjs/projects/bugflow/js/test",
+            "../bugjs/projects/bugioc/js/test",
+            "../bugjs/projects/bugjs/js/test",
+            "../bugjs/projects/bugtrace/js/test"
         ],
         resourcePaths: [
             "./projects/minerbugserver/resources"
@@ -92,16 +95,17 @@ buildProperties({
             version: "0.0.1",
             main: "./scripts/minerbugapi-module.js",
             dependencies: {
-                "bugpack": "https://s3.amazonaws.com/airbug/bugpack-0.0.5.tgz"
+                "bugpack": "https://s3.amazonaws.com/airbug/bugpack-0.0.5.tgz",
+                "socket.io-client": "0.9.x"
             }
         },
         sourcePaths: [
             "./projects/minerbug/js/src",
             "./projects/minerbugapi/js/src",
+            "../bugjs/projects/annotate/js/src",
+            '../bugjs/projects/bugflow/js/src',
             "../bugjs/projects/bugjs/js/src",
             "../bugjs/projects/bugtrace/js/src",
-            '../bugjs/projects/bugflow/js/src',
-            "../bugjs/projects/annotate/js/src",
             "../bugunit/projects/bugunit/js/src"
         ],
         scriptPaths: [
@@ -110,9 +114,6 @@ buildProperties({
         ],
         testPaths: [
             "../bugjs/projects/bugjs/js/test"
-        ],
-        resourcePaths: [
-            "./projects/minerbugserver/resources"
         ]
     },
     testfile: {
@@ -398,6 +399,8 @@ buildTarget('local').buildFlow(
 
 // Prod Flow
 //-------------------------------------------------------------------------------
+
+//TODO BRN:
 
 
 // TestFile Flow

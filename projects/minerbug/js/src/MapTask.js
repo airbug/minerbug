@@ -4,11 +4,10 @@
 
 //@Package('minerbug')
 
-//@Export('Task')
+//@Export('MapTask')
 
 //@Require('Class')
-//@Require('Obj')
-//@Require('TypeUtil')
+//@Require('minerbug.Task')
 
 
 //-------------------------------------------------------------------------------
@@ -22,16 +21,15 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var Class =     bugpack.require('Class');
-var Obj =       bugpack.require('Obj');
-var TypeUtil =  bugpack.require('TypeUtil');
+var Class = bugpack.require('Class');
+var Task =  bugpack.require('TypeUtil');
 
 
 //-------------------------------------------------------------------------------
 // Declare Class
 //-------------------------------------------------------------------------------
 
-var Task = Class.extend(Obj, {
+var MapTask = Class.extend(Task, {
 
     //-------------------------------------------------------------------------------
     // Constructor
@@ -39,78 +37,25 @@ var Task = Class.extend(Obj, {
 
     _constructor: function(taskObject) {
 
-        this._super();
+        this._super(taskObject);
 
 
         //-------------------------------------------------------------------------------
         // Declare Variables
         //-------------------------------------------------------------------------------
 
-        /**
-         * @private
-         * @type {string}
-         */
-        this.source = "";
-
-        /**
-         * @private
-         * @type {string}
-         */
-        this.type = "";
-
-        if (taskObject) {
-            if (TypeUtil.isString(taskObject.type)) {
-                this.type = taskObject.type;
-            }
-            if (TypeUtil.isString(taskObject.source)) {
-                this.source = taskObject.source;
-            }
-        }
-    },
+        this.type = "map";
+    }
 
 
     //-------------------------------------------------------------------------------
     // Getters and Setters
     //-------------------------------------------------------------------------------
 
-    /**
-     * @return {string}
-     */
-    getSource: function() {
-        return this.source;
-    },
-
-    /**
-     * @return {string}
-     */
-    getType: function() {
-        return this.type;
-    },
-
 
     //-------------------------------------------------------------------------------
     // Class Methods
     //-------------------------------------------------------------------------------
-
-    /**
-     *
-     */
-    execute: function(data) {
-        var method = null;
-        eval("method = " + this.source);
-        var results = method(data);
-        return results;
-    },
-
-    /**
-     * @return {Object}
-     */
-    toObject: function() {
-        return {
-            source: this.source,
-            type: this.type
-        }
-    }
 });
 
 
@@ -118,4 +63,4 @@ var Task = Class.extend(Obj, {
 // Export
 //-------------------------------------------------------------------------------
 
-bugpack.export('minerbug.Task', Task);
+bugpack.export('minerbug.MapTask', MapTask);

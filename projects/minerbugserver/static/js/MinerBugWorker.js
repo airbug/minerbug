@@ -2,16 +2,15 @@
 // Annotations
 //-------------------------------------------------------------------------------
 
-//@Package('minerbug')
+//@Package('minerbugworker')
 
-//@Export('MinerBugWorker')
-//@Autoload
+//@Export('MinerbugWorker')
 
+//@Require('Call')
 //@Require('Class')
 //@Require('Obj')
 //@Require('bugflow.BugFlow')
 //@Require('minerbug.TaskRunner')
-//@Require('socketio.SocketIo')
 
 
 //-------------------------------------------------------------------------------
@@ -25,11 +24,11 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var Class =             bugpack.require('Class');
-var Obj =               bugpack.require('Obj');
-var BugFlow =           bugpack.require('bugflow.BugFlow');
-var TaskRunner =        bugpack.require('minerbug.TaskRunner');
-var SocketIo =          bugpack.require('socketio.SocketIo');
+var Call            = bugpack.require('Call');
+var Class           = bugpack.require('Class');
+var Obj             = bugpack.require('Obj');
+var BugFlow         = bugpack.require('bugflow.BugFlow');
+var TaskRunner      = bugpack.require('minerbug.TaskRunner');
 
 
 //-------------------------------------------------------------------------------
@@ -46,13 +45,13 @@ var $task               = BugFlow.$task;
 // Declare Class
 //-------------------------------------------------------------------------------
 
-var MinerBugWorker = Class.extend(Obj, {
+var MinerbugWorker = Class.extend(Obj, {
 
     //-------------------------------------------------------------------------------
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function(config) {
+    _constructor: function() {
 
         this._super();
 
@@ -63,89 +62,28 @@ var MinerBugWorker = Class.extend(Obj, {
 
         /**
          * @private
-         * @type {function()}
+         * @type {MinerbugWorkerApi}
          */
-        this.connectCallback = null;
+        this.minerbugWorkerApi = null;
 
         /**
          * @private
-         * @type {boolean}
+         * @type {WorkAssignmentCall}
          */
-        this.connectCallbackFired = false;
-
-        /**
-         * @private
-         * @type {string}
-         */
-        this.hostname = config.hostname ? ;
-
-        /**
-         * @private
-         * @type {boolean}
-         */
-        this.isConnecting = false;
-
-        /**
-         * @private
-         * @type {boolean}
-         */
-        this.isConnected = false;
-
-        /**
-         * @private
-         * @type {number}
-         */
-        this.port = NaN;
-
-        /**
-         * @private
-         * @type {number}
-         */
-        this.retryAttempts = 0;
-
-        /**
-         * @private
-         * @type {number}
-         */
-        this.retryLimit = 3;
-
-        /**
-         * @private
-         * @type {*}
-         */
-        this.socket = null;
+        this.workAssignmentCall = null;
     },
 
 
     //-------------------------------------------------------------------------------
-    // Class Methods
+    // Public Class Methods
     //-------------------------------------------------------------------------------
 
     /**
      *
      */
-    start: function() {
-        var _this = this;
-        $series([
-            $task(function(flow) {
-                _this.configure(function(error) {
-                    flow.complete(error);
-                });
-            }),
-            $task(function(flow) {
-                _this.initialize(function(error) {
-                    flow.complete(error);
-                });
-            })
-        ]).execute(function(error) {
-                if (!error) {
-                    //TEST
-                    console.log("MinerBugApplication successfully started");
-                } else {
-                    console.log("MinerBugApplication encountered an error on startup");
-                    console.error(error);
-                }
-            });
+    start: function(callback) {
+        this.requestWorkAssignment();
+        callback();
     },
 
 
@@ -155,141 +93,79 @@ var MinerBugWorker = Class.extend(Obj, {
 
     /**
      * @private
-     * @param {Error=} error
      */
-    completeConnect: function(error) {
-        if (!this.initializeCallbackFired){
-            this.initializeCallbackFired = true;
-            if (this.initializeCallback) {
-                this.initializeCallback(error);
-            }
-        }
+    cleanupWorkAssignment: function() {
+        this.workAssignmentCall.cleanup();
+        this.workAssignmentCall = null;
     },
 
     /**
      * @private
-     * @param callback
+     * @param {*} results
      */
-    configure: function(callback) {
-        callback();
+    completeWorkAssignment: function(results) {
+         this.workAssignmentCall.completeWorkAssignment(results);
     },
 
     /**
      * @private
-     * @param {function()} callback
      */
-    connect: function(callback) {
+    requestWorkAssignment: function() {
+        var workAssignmentCall = this.minerbugWorkerApi.workAssignment();
+        workAssignmentCall.onWorkAssignmentReceived(this.hearWorkAssignmentReceivedEvent, this);
+        workAssignmentCall.onWorkAssignmentSignOffReceived(this.hearWorkAssignmentSignOffReceivedEvent, this);
+        workAssignmentCall.on(Call.EventTypes.ERROR, this.hearCallErrorEvent, this);
+        workAssignmentCall.requestWorkAssignment();
+        this.workAssignmentCall = workAssignmentCall;
+    },
+
+    /**
+     * @private
+     * @param {WorkAssignment} workAssignment
+     */
+    startWorkAssignment: function(workAssignment) {
         var _this = this;
-        if (!this.isConnected && !this.isConnecting) {
-            this.isConnecting = true;
-            console.log('MinerBugApplication is attempting to connect...');
-            var options = {
-                //     port: 80
-                //   , secure: false
-                //   , document: 'document' in global ? document : false,
-                resource: 'socket-api' // defaults to 'socket.io'
-                //   , transports: io.transports
-                //   , 'connect timeout': 10000
-                //   , 'try multiple transports': true
-                //   , 'reconnect': true
-                //   , 'reconnection delay': 500
-                //   , 'reconnection limit': Infinity
-                //   , 'reopen delay': 3000
-                //   , 'max reconnection attempts': 10
-                //   , 'sync disconnect on unload': false
-                //   , 'auto connect': true
-                //   , 'flash policy port': 10843
-                //   , 'manualFlush': false
-            };
-            this.socket = SocketIo.connect(this.hostname, options);
-            this.socket.on('connect', function() {
-                _this.isConnected = true;
-                _this.isConnecting = false;
-                console.log('MinerBugApplication is connected');
-            })
-                .on('connect_error', function(error) {
-                    _this.isConnecting = false;
-                    console.log('MinerBugApplication connect_error', error);
-                    _this.initializeComplete(error);
-                })
-                .on('connection_timeout', function() {
-                    _this.isConnecting = false;
-                    console.log('MinerBugApplication connection_timeout');
-                })
-                .on('connect_failed', function() {
-                    _this.isConnecting = false;
-                    console.log('MinerBugApplication connection_failed');
-                })
-                .on('reconnect', function(websocket) {
-                    _this.isConnected = true;
-                    console.log('MinerBugApplication reconnected');
-                })
-                .on('reconnect_error', function(error) {
-                    console.log('MinerBugApplication reconnect_error', error);
-                })
-                .on('reconnect_failed', function() {
-                    console.log('MinerBugApplication reconnect_failed');
-                })
-                .on('error', function(error) {
-                    _this..isConnecting = false;
-                    console.log('MinerBugApplication error:', error);
-                    _this..retryConnect();
-                })
-                .on('disconnect', function() {
-                    _this..isConnecting = false;
-                    _this.isConnected = false;
-                    console.log('MinerBugApplication disconnected');
-                    // socket.io automatically attempts to reconnect on disconnect
-                    // defaults to 10 attempts
-                    // NOTE: SUNG may want to create a longer running interval here
-                });
-
-            this.socket.socket.connect();
-        }
-    },
-
-    /**
-     * @private
-     * @param callback
-     */
-    initialize: function(callback) {
-        var _this = this;
-        $series([
-            $task(function(flow) {
-                _this.startConnect(function(error) {
-                    flow.complete(error);
-                });
-            })
-        ]).execute(callback);
-    },
-
-    /**
-     * @private
-     */
-    retryConnect: function() {
-        if (this.retryAttempts < this.retryLimit) {
-            this.retryAttempts++;
-            this.connect();
-        } else {
-            this.completeConfiguration(new Error("Maximum retries reached. Could not connect to minerbug server."));
-        }
-    },
-
-    /**
-     * @private
-     * @param {Task} task
-     */
-    runTask: function(task, data, callback) {
+        var task = workAssignment.getTask();
+        var data = workAssignment.getData();
         var taskRunner = new TaskRunner(task);
-        taskRunner.runTask(data, callback);
+        taskRunner.runTask(data, function(error, results) {
+            if (!error) {
+                _this.completeWorkAssignment(results);
+            } else {
+                //TODO BRN: Handle errors
+            }
+        });
+    },
+
+
+    //-------------------------------------------------------------------------------
+    // Event Listeners
+    //-------------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {Event} event
+     */
+    hearCallErrorEvent: function(event) {
+        //TODO BRN: What do we do here?
     },
 
     /**
      * @private
-     * @param {function(Error)} callback
+     * @param {Event} event
      */
-    startConnect: function(callback) {
+    hearWorkAssignmentReceivedEvent: function(event) {
+        var workAssignment = event.getData().workAssignment;
+        this.startWorkAssignment(workAssignment);
+    },
 
+    /**
+     * @private
+     * @param {Event} event
+     */
+    hearWorkAssignmentSignOffReceivedEvent: function(event) {
+        this.cleanupWorkAssignment();
+        this.requestWorkAssignment();
     }
 });
 
@@ -298,4 +174,4 @@ var MinerBugWorker = Class.extend(Obj, {
 // Exports
 //-------------------------------------------------------------------------------
 
-bugpack.export("minerbug.MinerBugWorker", MinerBugWorker);
+bugpack.export("minerbugworker.MinerbugWorker", MinerbugWorker);
