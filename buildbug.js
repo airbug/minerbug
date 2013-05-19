@@ -51,7 +51,7 @@ buildProperties({
                 "socket.io": "0.9.x"
             },
             scripts: {
-                "start": "node ./scripts/minerbug-server-start.js"
+                "start": "node ./scripts/minerbug-server-application-start.js"
             }
         },
         sourcePaths: [
