@@ -151,9 +151,8 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
      */
     socketIoConfig: function() {
         return new SocketIoConfig({
-            host: "http://localhost",
-            port: 8000,
-            resource: "sockets"
+            host: "http://localhost/minerbug-worker",
+            port: 8000
         })
     },
 

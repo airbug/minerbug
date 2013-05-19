@@ -112,9 +112,8 @@ MinerbugApi.getInstance = function() {
         var callManager = new CallManager();
         var serverSocketIoFactory = new ServerSocketIoFactory();
         var socketIoConfig = new SocketIoConfig({
-            hostname: "http://localhost.com",
-            port: 8000,
-            resource: "sockets"
+            hostname: "http://localhost.com/minerbug-api",
+            port: 8000
         });
         var socketIoClient = new SocketIoClient(serverSocketIoFactory, socketIoConfig);
         var socketIoMessageTransport = new SocketIoMessageTransport(socketIoClient);

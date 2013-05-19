@@ -81,38 +81,6 @@ var MinerbugWorkerController = Class.extend(Obj, {
     //-------------------------------------------------------------------------------
 
     /**
-     *
-     */
-    start: function (callback) {
-        var _this = this;
-        $series([
-            $task(function(flow) {
-                _this.configure(function(error) {
-                    if (!error) {
-                        flow.complete();
-                    } else {
-                        flow.error(error);
-                    }
-                });
-            }),
-            $task(function(flow){
-                _this.initialize(function(error){
-                    if (!error){
-                        flow.complete();
-                    } else {
-                        flow.error(error);
-                    }
-                })
-            })
-        ]).execute(callback);
-    },
-
-
-    //-------------------------------------------------------------------------------
-    // Private Class Methods
-    //-------------------------------------------------------------------------------
-
-    /**
      * @param {function()} callback
      */
     configure: function(callback){
