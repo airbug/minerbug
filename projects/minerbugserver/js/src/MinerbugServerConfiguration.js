@@ -21,6 +21,8 @@
 //@Require('express.ExpressServer')
 //@Require('minerbugserver.MinerbugApiController')
 //@Require('minerbugserver.MinerbugWorkerController')
+//@Require('minerbugserver.JobManager')
+//@Require('minerbugserver.JobProcessor')
 //@Require('socketio:server.SocketIoManager');
 //@Require('socketio:server.SocketIoServer')
 //@Require('socketio:server.SocketIoServerConfig')
@@ -54,6 +56,7 @@ var ExpressServer               = bugpack.require('express.ExpressServer');
 var MinerbugApiController       = bugpack.require('minerbugserver.MinerbugApiController');
 var MinerbugWorkerController    = bugpack.require('minerbugserver.MinerbugWorkerController');
 var JobManager                  = bugpack.require('minerbugserver.JobManager');
+var JobProcessor                = bugpack.require('minerbugserver.JobProcessor');
 var SocketIoManager             = bugpack.require('socketio:server.SocketIoManager');
 var SocketIoServer              = bugpack.require('socketio:server.SocketIoServer');
 var SocketIoServerConfig        = bugpack.require('socketio:server.SocketIoServerConfig');
@@ -136,6 +139,11 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
          */
         this._jobManager = null;
 
+        /**
+         * @private
+         * @type {JobProcessor}
+         */
+        this._jobProcessor = null;
     },
 
 
@@ -273,6 +281,22 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
      */
     socketIoServerConfig: function() {
         return new SocketIoServerConfig({});
+    },
+
+    /**
+     * @return {JobManager}
+     */
+    jobManager: function() {
+        this._jobManager = new JobManager();
+        return this._jobManager;
+    },
+
+    /**
+     * @return {JobProcessor}
+     */
+    jobProcessor: function() {
+        this._jobProcessor = new JobProcessor();
+        return this._jobProcessor;
     }
 });
 
@@ -319,7 +343,11 @@ annotate(MinerbugServerConfiguration).with(
                 arg("expressServer").ref("expressServer")
             ]),
         module("socketIoServerConfig"),
-        module("jobManager")
+        module("jobManager"),
+        module("jobProcessor")
+            .properties([
+                property("jobManager").ref("jobManager")
+            ])
     ])
 );
 

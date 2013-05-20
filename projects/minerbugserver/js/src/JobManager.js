@@ -2,7 +2,7 @@
 // Annotations
 //-------------------------------------------------------------------------------
 
-//@Package('minerbug')
+//@Package('minerbugserver')
 
 //@Export('JobManager')
 
@@ -53,12 +53,6 @@ var JobManager = Class.extend(Obj, {
         this.jobs = new Queue();
     },
 
-get next job 
-
-    job processor > get next job
-
-    configuration, add job manager
-        inject job manager into job processor
     //-------------------------------------------------------------------------------
     // Getters and Setters
     //-------------------------------------------------------------------------------
@@ -84,4 +78,4 @@ get next job
 // Export
 //-------------------------------------------------------------------------------
 
-bugpack.export('minerbug.JobManager', JobManager);
+bugpack.export('minerbugserver.JobManager', JobManager);
