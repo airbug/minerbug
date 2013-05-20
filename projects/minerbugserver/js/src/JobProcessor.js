@@ -2,9 +2,9 @@
 // Annotations
 //-------------------------------------------------------------------------------
 
-//@Package('minerbug')
+//@Package('minerbugserver')
 
-//@Export('JobManager')
+//@Export('JobProcessor')
 
 //@Require('Class')
 //@Require('Obj')
@@ -25,14 +25,13 @@ var bugpack = require('bugpack').context();
 var Class =     bugpack.require('Class');
 var Obj =       bugpack.require('Obj');
 var TypeUtil =  bugpack.require('TypeUtil');
-var Queue =     bugpack.require('Queue');
 
 
 //-------------------------------------------------------------------------------
 // Declare Class
 //-------------------------------------------------------------------------------
 
-var JobManager = Class.extend(Obj, {
+var JobProcessor = Class.extend(Obj, {
 
     //-------------------------------------------------------------------------------
     // Constructor
@@ -45,38 +44,25 @@ var JobManager = Class.extend(Obj, {
         //-------------------------------------------------------------------------------
         // Declare Variables
         //-------------------------------------------------------------------------------
-
         /**
          * @private
-         * @type {array}
+         * @type {JobManager}
          */
-        this.jobs = new Queue();
+        this.jobManager = null;
     },
+    start: function () {
+        // keep a count of running jobs?
+        // try to get the next one on startup if there aren't any running?
 
-get next job 
 
-    job processor > get next job
-
-    configuration, add job manager
-        inject job manager into job processor
-    //-------------------------------------------------------------------------------
-    // Getters and Setters
-    //-------------------------------------------------------------------------------
-
-    /**
-     * job manager will be queue for ALL jobs for now, later on, add more CRUD activity for a specific supplier
-     * @return {*}
-     */
-    getNextJob: function () {
-        return this.jobs.dequeue();
-    },
-
-    /**
-     * @param {*}
-     */
-    addJob: function(job) {
-        return this.jobs.add(job);
     }
+    // TODO AL: methods
+    //checkAvailableMemory
+    //checkAvailableDiskSpace
+    //getNextJob
+    //processNextJob
+    //registerTask (listen to task)
+    //createData
 });
 
 
@@ -84,4 +70,4 @@ get next job
 // Export
 //-------------------------------------------------------------------------------
 
-bugpack.export('minerbug.JobManager', JobManager);
+bugpack.export('minerbugserver.JobProcessor', JobProcessor);

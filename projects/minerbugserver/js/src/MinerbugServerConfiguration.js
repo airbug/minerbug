@@ -53,6 +53,7 @@ var ExpressApp                  = bugpack.require('express.ExpressApp');
 var ExpressServer               = bugpack.require('express.ExpressServer');
 var MinerbugApiController       = bugpack.require('minerbugserver.MinerbugApiController');
 var MinerbugWorkerController    = bugpack.require('minerbugserver.MinerbugWorkerController');
+var JobManager                  = bugpack.require('minerbugserver.JobManager');
 var SocketIoManager             = bugpack.require('socketio:server.SocketIoManager');
 var SocketIoServer              = bugpack.require('socketio:server.SocketIoServer');
 var SocketIoServerConfig        = bugpack.require('socketio:server.SocketIoServerConfig');
@@ -121,13 +122,20 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
          * @type {MinerbugWorkerController}
          */
         this._minerbugWorkerController = null;
-
-        /**
+        
+       /**
          * @private
          * @type {SocketIoManager}
          * @private
          */
         this._minerbugWorkerSocketManager = null;
+        
+        /**
+         * @private
+         * @type {JobManager}
+         */
+        this._jobManager = null;
+
     },
 
 
@@ -310,7 +318,8 @@ annotate(MinerbugServerConfiguration).with(
                 arg("config").ref("socketIoServerConfig"),
                 arg("expressServer").ref("expressServer")
             ]),
-        module("socketIoServerConfig")
+        module("socketIoServerConfig"),
+        module("jobManager")
     ])
 );
 

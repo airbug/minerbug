@@ -3,7 +3,8 @@
     "name": "word count",
     "sources": [
         {
-            "url": "http://localhost:8000/files/job1.txt"
+            "url": "http://localhost:8000/files/job1.txt",
+            "delimiter": "\n"
         },
         {
             "input": [1,2,3,4,5,6,7,8]
