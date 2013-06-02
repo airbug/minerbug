@@ -10,10 +10,11 @@
 //@Require('Class')
 //@Require('Obj')
 //@Require('Proxy')
-//@Require('minerbug.MapReduceCall')
+//@Require('minerbugapi.JobBuilder')
+//@Require('minerbugapi.RegisterJobCall')
 //@Require('socketio:client.SocketIoClient')
 //@Require('socketio:client.SocketIoConfig')
-//@Require('socketio:client.SocketIoMessageTransport')
+//@Require('socketio:client.SocketIoClientMessageChannel')
 //@Require('socketio:factoryserver.ServerSocketIoFactory')
 
 
@@ -28,15 +29,16 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var CallManager                 = bugpack.require('CallManager');
-var Class                       = bugpack.require('Class');
-var Obj                         = bugpack.require('Obj');
-var Proxy                       = bugpack.require('Proxy');
-var MapReduceCall               = bugpack.require('minerbugapi.MapReduceCall');
-var SocketIoClient              = bugpack.require('socketio:client.SocketIoClient');
-var SocketIoConfig              = bugpack.require('socketio:client.SocketIoConfig');
-var SocketIoMessageTransport    = bugpack.require('socketio:client.SocketIoMessageTransport');
-var ServerSocketIoFactory       = bugpack.require('socketio:factoryserver.ServerSocketIoFactory');
+var CallManager                     = bugpack.require('CallManager');
+var Class                           = bugpack.require('Class');
+var Obj                             = bugpack.require('Obj');
+var Proxy                           = bugpack.require('Proxy');
+var JobBuilder                      = bugpack.require('minerbugapi.JobBuilder');
+var RegisterJobCall                 = bugpack.require('minerbugapi.RegisterJobCall');
+var SocketIoClient                  = bugpack.require('socketio:client.SocketIoClient');
+var SocketIoConfig                  = bugpack.require('socketio:client.SocketIoConfig');
+var SocketIoClientMessageChannel    = bugpack.require('socketio:client.SocketIoClientMessageChannel');
+var ServerSocketIoFactory           = bugpack.require('socketio:factoryserver.ServerSocketIoFactory');
 
 
 //-------------------------------------------------------------------------------
@@ -49,7 +51,7 @@ var MinerbugApi = Class.extend(Obj, {
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function(callManager, socketIoMessageTransport) {
+    _constructor: function(callManager, outgoingMessageChannel) {
 
         this._super();
 
@@ -65,28 +67,37 @@ var MinerbugApi = Class.extend(Obj, {
 
         /**
          * @private
-         * @type {SocketIoMessageTransport}
+         * @type {IMessageChannel}
          */
-        this.socketIoMessageTransport = socketIoMessageTransport;
-
-
-        this.socketIoMessageTransport.setIncomingMessageReceiver(this.callManager.getIncomingMessageRouter());
-        this.callManager.setOutGoingMessageReceiver(this.socketIoMessageTransport);
+        this.outGoingMessageChannel = outgoingMessageChannel;
     },
 
 
     //-------------------------------------------------------------------------------
-    // Class Methods
+    // Instance Methods
     //-------------------------------------------------------------------------------
 
     /**
      * @param {Array.<string>} dataSources
-     * @return {MapReduceCall}
+     * @return {JobBuilder}
      */
-    mapReduce: function(dataSources) {
-        var mapReduceCall = new MapReduceCall(dataSources);
-        this.callManager.registerCall(mapReduceCall);
-        return mapReduceCall;
+    mine: function(dataSources) {
+        return new JobBuilder(dataSources);
+    },
+
+    /**
+     * @param {Job} job
+     * @param {function(error, JobWatcher} callback
+     */
+    registerJob: function(job, callback) {
+        var registerJobCall = new RegisterJobCall(dataSources);
+        this.callManager.registerCall(registerJobCall);
+        var registerJobMessage = new Message("registerJob", {
+            job: job.toObject()
+        });
+        this.sendMessage(registerJobMessage, this.minerbugMessagingChannel, function(responseChannel) {
+            responseChannel.on()
+        });
     }
 });
 
@@ -116,8 +127,8 @@ MinerbugApi.getInstance = function() {
             port: 8000
         });
         var socketIoClient = new SocketIoClient(serverSocketIoFactory, socketIoConfig);
-        var socketIoMessageTransport = new SocketIoMessageTransport(socketIoClient);
-        MinerbugApi.instance = new MinerbugApi(callManager, socketIoMessageTransport);
+        var socketIoClientMessageChannel = new SocketIoClientMessageChannel(socketIoClient);
+        MinerbugApi.instance = new MinerbugApi(callManager, socketIoClientMessageChannel);
     }
     return MinerbugApi.instance;
 };

@@ -63,9 +63,15 @@ var MinerbugWorkerController = Class.extend(Obj, {
 
         /**
          * @private
+         * @type {MessagePublisher}
+         */
+        this.messagePublisher = null;
+
+        /**
+         * @private
          * @type {SocketIoManager}
          */
-        this.minerbugWorkerSocketManager = null;
+        this.socketManager = null;
     },
 
 

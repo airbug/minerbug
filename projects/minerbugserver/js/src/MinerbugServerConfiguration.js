@@ -8,6 +8,8 @@
 //@Autoload
 
 //@Require('Class')
+//@Require('MessagePublisher')
+//@Require('MessageRouter')
 //@Require('Obj')
 //@Require('annotate.Annotate')
 //@Require('bugflow.BugFlow')
@@ -42,6 +44,8 @@ var mu2Express  = require("mu2express");
 //-------------------------------------------------------------------------------
 
 var Class                       = bugpack.require('Class');
+var MessagePublisher            = bugpack.require('MessagePublisher');
+var MessageRouter               = bugpack.require('MessageRouter');
 var Obj                         = bugpack.require('Obj');
 var Annotate                    = bugpack.require('annotate.Annotate');
 var BugFlow                     = bugpack.require('bugflow.BugFlow');
@@ -229,7 +233,8 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
      * @return {ExpressServer}
      */
     expressServer: function(expressApp) {
-        return new ExpressServer(expressApp);
+        this._expressServer = new ExpressServer(expressApp);
+        return this._expressServer;
     },
 
     /**
@@ -238,6 +243,20 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
     minerbugApiController: function() {
         this._minerbugApiController = new MinerbugApiController();
         return this._minerbugApiController;
+    },
+
+    /**
+     * @return {MessagePublisher}
+     */
+    minerbugApiIncomingMessagePublisher: function() {
+        return new MessagePublisher();
+    },
+
+    /**
+     * @return {MessageRouter}
+     */
+    minerbugApiOutgoingMessageRouter: function() {
+        return new MessageRouter();
     },
 
     /**
@@ -255,6 +274,20 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
     minerbugWorkerController: function() {
         this._minerbugWorkerController = new MinerbugWorkerController();
         return this._minerbugWorkerController;
+    },
+
+    /**
+     * @return {MessagePublisher}
+     */
+    minerbugWorkerIncomingMessagePublisher: function() {
+        return new MessagePublisher();
+    },
+
+    /**
+     * @return {MessageRouter}
+     */
+    minerbugWorkerOutgoingMessageRouter: function() {
+        return new MessageRouter();
     },
 
     /**
@@ -322,8 +355,12 @@ annotate(MinerbugServerConfiguration).with(
         module("minerbugApiController")
             .properties([
                 property("expressApp").ref("expressApp"),
-                property("minerbugApiSocketManager").ref("minerbugApiSocketManager")
+                property("incomingMessagePublisher").ref("minerbugApiIncomingMessagePublisher"),
+                property("outgoingMessageRouter").ref("minerbugApiOutgoingMessageRouter"),
+                property("socketManager").ref("minerbugApiSocketManager")
             ]),
+        module("minerbugApiIncomingMessagePublisher"),
+        module("minerbugApiOutgoingMessageRouter"),
         module("minerbugApiSocketManager")
             .args([
                 arg("socketIoServer").ref("socketIoServer")
@@ -331,8 +368,12 @@ annotate(MinerbugServerConfiguration).with(
         module("minerbugWorkerController")
             .properties([
                 property("expressApp").ref("expressApp"),
-                property("minerbugWorkerSocketManager").ref("minerbugWorkerSocketManager")
+                property("incomingMessagePublisher").ref("minerbugWorkerIncomingMessagePublisher"),
+                property("outgoingMessageRouter").ref("minerbugWorkerOutgoingMessageRouter"),
+                property("socketManager").ref("minerbugWorkerSocketManager")
             ]),
+        module("minerbugWorkerIncomingMessagePublisher"),
+        module("minerbugWorkerOutgoingMessageRouter"),
         module("minerbugWorkerSocketManager")
             .args([
                 arg("socketIoServer").ref("socketIoServer")

@@ -68,14 +68,14 @@ var WorkAssignmentCall = Class.extend(Call, {
 
 
     //-------------------------------------------------------------------------------
-    // IMessageReceiver Implementation
+    // IMessageChannel Implementation
     //-------------------------------------------------------------------------------
 
     /**
      * @param {Message} message
      * @param {string} channel
      */
-    receiveMessage: function(message, channel) {
+    channelMessage: function(message, channel) {
         this._super(message, channel);
         if (channel === "message") {
             if (message.getTopic() === WorkAssignmentCall.IncomingMessageTopics.WORK_ASSIGNMENT) {

@@ -2,13 +2,16 @@
 // Annotations
 //-------------------------------------------------------------------------------
 
-//@Package('minerbugworker')
+//@Package('minerbugapi')
 
-//@Export('MinerbugWorkerApi')
+//@Export('JobBuilder')
 
 //@Require('Class')
+//@Require('List')
 //@Require('Obj')
-//@Require('minerbugworker.WorkAssignmentCall')
+//@Require('minerbug.Job')
+//@Require('minerbug.MapTask')
+//@Require('minerbug.ReduceTask')
 
 
 //-------------------------------------------------------------------------------
@@ -22,22 +25,25 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var Class               = bugpack.require('Class');
-var Obj                 = bugpack.require('Obj');
-var WorkAssignmentCall  = bugpack.require('minerbugworker.WorkAssignmentCall');
+var Class       = bugpack.require('Class');
+var List        = bugpack.require('List');
+var Obj         = bugpack.require('Obj');
+var Job         = bugpack.require('minerbug.Job');
+var MapTask     = bugpack.require('minerbug.MapTask');
+var ReduceTask  = bugpack.require('minerbug.ReduceTask');
 
 
 //-------------------------------------------------------------------------------
 // Declare Class
 //-------------------------------------------------------------------------------
 
-var MinerbugWorkerApi = Class.extend(Obj, {
+var JobBuilder = Class.extend(Obj, {
 
     //-------------------------------------------------------------------------------
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function(callManager, socketIoClientMessageChannel) {
+    _constructor: function(dataSources) {
 
         this._super();
 
@@ -47,19 +53,15 @@ var MinerbugWorkerApi = Class.extend(Obj, {
 
         /**
          * @private
-         * @type {CallManager}
+         * @type {Array.<string>}
          */
-        this.callManager = callManager;
+        this.dataSources = dataSources;
 
         /**
          * @private
-         * @type {SocketIoClientMessageChannel}
+         * @type {List.<Task>}
          */
-        this.socketIoClientMessageChannel = socketIoClientMessageChannel;
-
-
-        this.socketIoClientMessageChannel.setIncomingMessageChannel(this.callManager.getIncomingMessageRouter());
-        this.callManager.setOutgoingMessageChannel(this.socketIoClientMessageChannel);
+        this.taskList = new List();
     },
 
 
@@ -68,12 +70,31 @@ var MinerbugWorkerApi = Class.extend(Obj, {
     //-------------------------------------------------------------------------------
 
     /**
-     * @return {WorkAssignmentCall}
+     * @param {function()} mapMethod
+     * @return {JobBuilder}
      */
-    workAssignment: function() {
-        var workAssignmentCall = new WorkAssignmentCall();
-        this.callManager.registerCall(workAssignmentCall);
-        return workAssignmentCall;
+    map: function(mapMethod) {
+        this.taskList.add(new MapTask({source: mapMethod}));
+        return this;
+    },
+
+    /**
+     * @param {function()} reduceMethod
+     * @return {JobBuilder}
+     */
+    reduce: function(reduceMethod) {
+        this.taskList.add(new ReduceTask({source: reduceMethod}));
+        return this;
+    },
+
+    /**
+     * @return {Job}
+     */
+    build: function() {
+        return new Job({
+            dataSources: this.dataSources,
+            tasks: this.taskList.getValueArray()
+        });
     }
 });
 
@@ -82,4 +103,4 @@ var MinerbugWorkerApi = Class.extend(Obj, {
 // Export
 //-------------------------------------------------------------------------------
 
-bugpack.export('minerbugworker.MinerbugWorkerApi', MinerbugWorkerApi);
+bugpack.export('minerbugapi.JobBuilder', JobBuilder);

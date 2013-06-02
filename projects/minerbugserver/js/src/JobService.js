@@ -2,13 +2,12 @@
 // Annotations
 //-------------------------------------------------------------------------------
 
-//@Package('minerbugworker')
+//@Package('minerbugserver')
 
-//@Export('MinerbugWorkerApi')
+//@Export('JobService')
 
 //@Require('Class')
 //@Require('Obj')
-//@Require('minerbugworker.WorkAssignmentCall')
 
 
 //-------------------------------------------------------------------------------
@@ -22,44 +21,31 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var Class               = bugpack.require('Class');
-var Obj                 = bugpack.require('Obj');
-var WorkAssignmentCall  = bugpack.require('minerbugworker.WorkAssignmentCall');
+var Class =     bugpack.require('Class');
+var Obj =       bugpack.require('Obj');
 
 
 //-------------------------------------------------------------------------------
 // Declare Class
 //-------------------------------------------------------------------------------
 
-var MinerbugWorkerApi = Class.extend(Obj, {
+var JobService = Class.extend(Obj, {
+
 
     //-------------------------------------------------------------------------------
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function(callManager, socketIoClientMessageChannel) {
+    _constructor: function() {
 
         this._super();
+
 
         //-------------------------------------------------------------------------------
         // Declare Variables
         //-------------------------------------------------------------------------------
 
-        /**
-         * @private
-         * @type {CallManager}
-         */
-        this.callManager = callManager;
-
-        /**
-         * @private
-         * @type {SocketIoClientMessageChannel}
-         */
-        this.socketIoClientMessageChannel = socketIoClientMessageChannel;
-
-
-        this.socketIoClientMessageChannel.setIncomingMessageChannel(this.callManager.getIncomingMessageRouter());
-        this.callManager.setOutgoingMessageChannel(this.socketIoClientMessageChannel);
+        this.jobManager = null;
     },
 
 
@@ -67,13 +53,8 @@ var MinerbugWorkerApi = Class.extend(Obj, {
     // Class Methods
     //-------------------------------------------------------------------------------
 
-    /**
-     * @return {WorkAssignmentCall}
-     */
-    workAssignment: function() {
-        var workAssignmentCall = new WorkAssignmentCall();
-        this.callManager.registerCall(workAssignmentCall);
-        return workAssignmentCall;
+    registerJob: function(job, callback) {
+
     }
 });
 
@@ -82,4 +63,4 @@ var MinerbugWorkerApi = Class.extend(Obj, {
 // Export
 //-------------------------------------------------------------------------------
 
-bugpack.export('minerbugworker.MinerbugWorkerApi', MinerbugWorkerApi);
+bugpack.export('minerbugserver.JobService', JobService);

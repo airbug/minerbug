@@ -4,14 +4,11 @@
 
 //@Package('minerbugapi')
 
-//@Export('MapReduceCall')
+//@Export('RegisterJobCall')
 
-//@Require('Call')
 //@Require('Class')
-//@Require('Message')
-//@Require('minerbug.MapReduceJob')
-//@Require('minerbug.MapTask')
-//@Require('minerbug.ReduceTask')
+//@Require('bugmessage.Call')
+//@Require('bugmessage.Message')
 
 
 //-------------------------------------------------------------------------------
@@ -25,12 +22,9 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var Call            = bugpack.require('Call');
 var Class           = bugpack.require('Class');
-var Message         = bugpack.require('Message');
-var MapReduceJob    = bugpack.require('minerbug.MapReduceJob');
-var MapTask         = bugpack.require('minerbug.MapTask');
-var ReduceTask      = bugpack.require('minerbug.ReduceTask');
+var Call            = bugpack.require('bugmessage.Call');
+var Message         = bugpack.require('bugmessage.Message');
 
 
 //-------------------------------------------------------------------------------
@@ -68,14 +62,14 @@ var MapReduceCall = Class.extend(Call, {
 
 
     //-------------------------------------------------------------------------------
-    // IMessageReceiver Implementation
+    // IMessageChannel Implementation
     //-------------------------------------------------------------------------------
 
     /**
      * @param {Message} message
      * @param {string} channel
      */
-    receiveMessage: function(message, channel) {
+    channelMessage: function(message, channel) {
         this._super(message, channel);
         if (channel === "message") {
             if (message.getTopic() === MapReduceCall.IncomingMessageTopics.JOB_ACCEPTANCE) {
@@ -104,30 +98,12 @@ var MapReduceCall = Class.extend(Call, {
     //-------------------------------------------------------------------------------
 
     /**
-     * @param {function()} mapMethod
-     * @return {*}
-     */
-    map: function(mapMethod) {
-        this.mapReduceJob.addTask(new MapTask({source: mapMethod}));
-        return this;
-    },
-
-    /**
-     * @param {functionreduceMethod
-     * @return {*}
-     */
-    reduce: function(reduceMethod) {
-        this.mapReduceJob.addTask(new ReduceTask({source: reduceMethod}));
-        return this;
-    },
-
-    /**
      *
      */
     registerJob: function() {
         if (!this.jobRegistered) {
             this.jobRegistered = true;
-            var message = new Message(MapReduceCall.OutgoingMessageTopics.JOB_REGISTRATION, {
+            var message = new Message(RegisterJobCall.MessageTopics.JOB_REGISTRATION, {
                 job: this.mapReduceJob.toObject()
             });
             this.sendMessage(message);
@@ -178,17 +154,8 @@ MapReduceCall.EventTypes = {
 /**
  * @enum {string}
  */
-MapReduceCall.IncomingMessageTopics = {
-    JOB_ACCEPTANCE: "JobAcceptance",
-    JOB_COMPLETION: "JobCompletion",
-    JOB_STATUS: "JobStatus"
-};
-
-/**
- * @enum {string}
- */
-MapReduceCall.OutgoingMessageTopics = {
-    JOB_REGISTRATION: "JobRegistration"
+MapReduceCall.MessageTopics = {
+    REGISTER_JOB: "RegisterJob"
 };
 
 
@@ -196,4 +163,4 @@ MapReduceCall.OutgoingMessageTopics = {
 // Export
 //-------------------------------------------------------------------------------
 
-bugpack.export('minerbug.MapReduceCall', MapReduceCall);
+bugpack.export('minerbug.MapReduceCall', RE);

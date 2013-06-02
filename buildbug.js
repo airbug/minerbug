@@ -66,6 +66,7 @@ buildProperties({
             "../bugjs/projects/express/js/src",
             "../bugjs/projects/socketio/bugjars/factoryserver/js/src",
             "../bugjs/projects/socketio/bugjars/server/js/src",
+            "../bugunit/projects/bugdouble/js/src",
             "../bugunit/projects/bugunit/js/src"
         ],
         scriptPaths: [
@@ -109,6 +110,7 @@ buildProperties({
             '../bugjs/projects/bugflow/js/src',
             "../bugjs/projects/bugjs/js/src",
             "../bugjs/projects/bugtrace/js/src",
+            "../bugunit/projects/bugdouble/js/src",
             "../bugunit/projects/bugunit/js/src"
         ],
         scriptPaths: [

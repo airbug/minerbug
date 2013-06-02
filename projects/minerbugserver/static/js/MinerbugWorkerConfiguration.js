@@ -20,7 +20,7 @@
 //@Require('minerbugworker.MinerbugWorkerApi')
 //@Require('socketio:client.SocketIoClient')
 //@Require('socketio:client.SocketIoConfig')
-//@Require('socketio:client.SocketIoMessageTransport')
+//@Require('socketio:client.SocketIoClientMessageChannel')
 //@Require('socketio:factorybrowser.BrowserSocketIoFactory')
 
 
@@ -48,7 +48,7 @@ var MinerbugWorker              = bugpack.require('minerbugworker.MinerbugWorker
 var MinerbugWorkerApi           = bugpack.require('minerbugworker.MinerbugWorkerApi');
 var SocketIoClient              = bugpack.require('socketio:client.SocketIoClient');
 var SocketIoConfig              = bugpack.require('socketio:client.SocketIoConfig');
-var SocketIoMessageTransport    = bugpack.require('socketio:client.SocketIoMessageTransport');
+var SocketIoClientMessageChannel    = bugpack.require('socketio:client.SocketIoClientMessageChannel');
 var BrowserSocketIoFactory      = bugpack.require('socketio:factorybrowser.BrowserSocketIoFactory');
 
 
@@ -130,11 +130,11 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
 
     /**
      * @param {CallManager} callManager
-     * @param {SocketIoMessageTransport} socketIoMessageTransport
+     * @param {SocketIoClientMessageChannel} socketIoClientMessageChannel
      * @return {MinerbugWorkerApi}
      */
-    minerbugWorkerApi: function(callManager, socketIoMessageTransport) {
-        return new MinerbugWorkerApi(callManager, socketIoMessageTransport);
+    minerbugWorkerApi: function(callManager, socketIoClientMessageChannel) {
+        return new MinerbugWorkerApi(callManager, socketIoClientMessageChannel);
     },
 
     /**
@@ -158,10 +158,10 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
 
     /**
      * @param {SocketIoClient} socketIoClient
-     * @return {SocketIoMessageTransport}
+     * @return {SocketIoClientMessageChannel}
      */
-    socketIoMessageTransport: function(socketIoClient) {
-        return new SocketIoMessageTransport(socketIoClient);
+    socketIoClientMessageChannel: function(socketIoClient) {
+        return new SocketIoClientMessageChannel(socketIoClient);
     }
 });
 
@@ -188,7 +188,7 @@ annotate(MinerbugWorkerConfiguration).with(
         module("minerbugWorkerApi")
             .args([
                 arg("callManager").ref("callManager"),
-                arg("socketIoMessageTransport").ref("socketIoMessageTransport")
+                arg("socketIoClientMessageChannel").ref("socketIoClientMessageChannel")
             ]),
         module("socketIoClient")
             .args([
@@ -196,7 +196,7 @@ annotate(MinerbugWorkerConfiguration).with(
                 arg("config").ref("socketIoConfig")
             ]),
         module("socketIoConfig"),
-        module("SocketIoMessageTransport")
+        module("SocketIoClientMessageChannel")
             .args([
                 arg("socketIoClient").ref("socketIoClient")
             ])
