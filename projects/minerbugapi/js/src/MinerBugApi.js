@@ -6,15 +6,16 @@
 
 //@Export('MinerbugApi')
 
-//@Require('CallManager')
 //@Require('Class')
 //@Require('Obj')
 //@Require('Proxy')
+//@Require('bugflow.BugFlow')
+//@Require('bugcall.CallApi')
+//@Require('bugcall.CallClient')
 //@Require('minerbugapi.JobBuilder')
-//@Require('minerbugapi.RegisterJobCall')
 //@Require('socketio:client.SocketIoClient')
 //@Require('socketio:client.SocketIoConfig')
-//@Require('socketio:client.SocketIoClientMessageChannel')
+//@Require('socketio:client.SocketIoClientChannel')
 //@Require('socketio:factoryserver.ServerSocketIoFactory')
 
 
@@ -29,16 +30,25 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var CallManager                     = bugpack.require('CallManager');
-var Class                           = bugpack.require('Class');
-var Obj                             = bugpack.require('Obj');
-var Proxy                           = bugpack.require('Proxy');
-var JobBuilder                      = bugpack.require('minerbugapi.JobBuilder');
-var RegisterJobCall                 = bugpack.require('minerbugapi.RegisterJobCall');
-var SocketIoClient                  = bugpack.require('socketio:client.SocketIoClient');
-var SocketIoConfig                  = bugpack.require('socketio:client.SocketIoConfig');
-var SocketIoClientMessageChannel    = bugpack.require('socketio:client.SocketIoClientMessageChannel');
-var ServerSocketIoFactory           = bugpack.require('socketio:factoryserver.ServerSocketIoFactory');
+var Class                   = bugpack.require('Class');
+var Obj                     = bugpack.require('Obj');
+var Proxy                   = bugpack.require('Proxy');
+var BugFlow                 = bugpack.require('bugflow.BugFlow');
+var CallApi                 = bugpack.require('bugcall.CallApi');
+var CallClient              = bugpack.require('bugcall.CallClient');
+var JobBuilder              = bugpack.require('minerbugapi.JobBuilder');
+var SocketIoClient          = bugpack.require('socketio:client.SocketIoClient');
+var SocketIoConfig          = bugpack.require('socketio:client.SocketIoConfig');
+var SocketIoClientChannel   = bugpack.require('socketio:client.SocketIoClientChannel');
+var ServerSocketIoFactory   = bugpack.require('socketio:factoryserver.ServerSocketIoFactory');
+
+
+//-------------------------------------------------------------------------------
+// Simplify References
+//-------------------------------------------------------------------------------
+
+var $series             = BugFlow.$series;
+var $task               = BugFlow.$task;
 
 
 //-------------------------------------------------------------------------------
@@ -51,7 +61,7 @@ var MinerbugApi = Class.extend(Obj, {
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function(callManager, outgoingMessageChannel) {
+    _constructor: function(callApi) {
 
         this._super();
 
@@ -61,15 +71,11 @@ var MinerbugApi = Class.extend(Obj, {
 
         /**
          * @private
-         * @type {CallManager}
+         * @type {CallApi}
          */
-        this.callManager = callManager;
+        this.callApi = callApi;
 
-        /**
-         * @private
-         * @type {IMessageChannel}
-         */
-        this.outGoingMessageChannel = outgoingMessageChannel;
+        this.jobWatcherManager = new JobWatcherManager();
     },
 
 
@@ -87,16 +93,70 @@ var MinerbugApi = Class.extend(Obj, {
 
     /**
      * @param {Job} job
-     * @param {function(error, JobWatcher} callback
+     * @param {function(Error, JobWatcher)} callback
+     */
+    registerAndWatchJob: function(job, callback) {
+        var _this = this;
+        var jobUuid = null;
+        var jobWatcher = null;
+        $series([
+            $task(function(flow) {
+                 _this.registerJob(job, function(error, _jobUuid) {
+                     jobUuid = _jobUuid;
+                     flow.complete(error);
+                 });
+            }),
+            $task(function(flow) {
+                _this.watchJob(jobUuid, function(error, _jobWatcher) {
+                    jobWatcher = _jobWatcher;
+                    flow.complete(error);
+                });
+            })
+        ]).execute(function(error) {
+            callback()
+        });
+    },
+
+    /**
+     * @param {Job} job
+     * @param {function(Error, string)} callback
      */
     registerJob: function(job, callback) {
-        var registerJobCall = new RegisterJobCall(dataSources);
-        this.callManager.registerCall(registerJobCall);
-        var registerJobMessage = new Message("registerJob", {
+        var callRequest = this.callApi.request(MinerbugApi.RequestTypes.REGISTER_JOB,  {
             job: job.toObject()
         });
-        this.sendMessage(registerJobMessage, this.minerbugMessagingChannel, function(responseChannel) {
-            responseChannel.on()
+        this.callApi.sendOrQueueRequest(callRequest, function(exception, callResponse) {
+            if (!exception) {
+                if (callResponse.getType() === "jobRegistered") {
+                    callback(null, callResponse.getData().jobUuid);
+                } else {
+                    throw new Error("Unhandled response type");
+                }
+            } else {
+                callback(error);
+            }
+        });
+    },
+
+    /**
+     * @param {string} jobUuid
+     * @param {function(Error, JobWatcher)} callback
+     */
+    watchJob: function(jobUuid, callback) {
+        var callRequest = this.callApi.request(MinerbugApi.RequestTypes.WATCH_JOB,  {
+            jobUuid: jobUuid
+        });
+        this.callApi.sendOrQueueRequest(callRequest, function(exception, callResponse) {
+            if (!exception) {
+                if (callResponse.getType() === "jobWatched") {
+
+                    callback(null, response.getData().jobUuid);
+                } else {
+                    throw new Error("Unhandled response type");
+                }
+            } else {
+                callback(error);
+            }
         });
     }
 });
@@ -113,6 +173,14 @@ var MinerbugApi = Class.extend(Obj, {
  */
 MinerbugApi.instance = null;
 
+/**
+ * @enum {string}
+ */
+MinerbugApi.RequestTypes = {
+    REGISTER_JOB: "registerJob",
+    WATCH_JOB: "watchJob"
+};
+
 
 //-------------------------------------------------------------------------------
 // Static Methods
@@ -120,21 +188,24 @@ MinerbugApi.instance = null;
 
 MinerbugApi.getInstance = function() {
     if (!MinerbugApi.instance) {
-        var callManager = new CallManager();
         var serverSocketIoFactory = new ServerSocketIoFactory();
         var socketIoConfig = new SocketIoConfig({
             hostname: "http://localhost.com/minerbug-api",
             port: 8000
         });
         var socketIoClient = new SocketIoClient(serverSocketIoFactory, socketIoConfig);
-        var socketIoClientMessageChannel = new SocketIoClientMessageChannel(socketIoClient);
-        MinerbugApi.instance = new MinerbugApi(callManager, socketIoClientMessageChannel);
+        var callClient = new CallClient(socketIoClient);
+        var callApi = new CallApi(callClient);
+        MinerbugApi.instance = new MinerbugApi(callApi);
     }
     return MinerbugApi.instance;
 };
 
-Proxy.proxy(MinerbugApi, MinerbugApi.getInstance, [
-    "mapReduce"
+Proxy.proxy(MinerbugApi, Proxy.method(MinerbugApi.getInstance), [
+    "mine",
+    "registerAndWatchJob",
+    "registerJob",
+    "watchJob"
 ]);
 
 

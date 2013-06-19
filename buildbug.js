@@ -58,7 +58,8 @@ buildProperties({
             "./projects/minerbug/js/src",
             "./projects/minerbugserver/js/src",
             "../bugjs/projects/annotate/js/src",
-            '../bugjs/projects/bugflow/js/src',
+            "../bugjs/projects/bugcall/js/src",
+            "../bugjs/projects/bugflow/js/src",
             "../bugjs/projects/bugfs/js/src",
             "../bugjs/projects/bugioc/js/src",
             "../bugjs/projects/bugjs/js/src",
@@ -66,6 +67,7 @@ buildProperties({
             "../bugjs/projects/express/js/src",
             "../bugjs/projects/socketio/bugjars/factoryserver/js/src",
             "../bugjs/projects/socketio/bugjars/server/js/src",
+            "../bugjs/projects/socketio/bugjars/socket/js/src",
             "../bugunit/projects/bugdouble/js/src",
             "../bugunit/projects/bugunit/js/src"
         ],
@@ -89,6 +91,7 @@ buildProperties({
             "../bugjs/external/jquery/js/src",
             "../bugjs/external/mustache/js/src",
             "../bugjs/external/socket-io/js/src",
+            "../bugjs/projects/bugcall/js/src",
             "../bugjs/projects/bugjs/js/src",
             "../bugpack/projects/bugpack-client/js/src"
         ]

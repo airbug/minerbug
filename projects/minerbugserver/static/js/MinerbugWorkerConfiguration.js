@@ -7,10 +7,13 @@
 //@Export('MinerbugWorkerConfiguration')
 //@Autoload
 
-//@Require('CallManager')
 //@Require('Class')
 //@Require('Obj')
 //@Require('annotate.Annotate')
+//@Require('bugcall.BugCallClient')
+//@Require('bugcall.CallClient')
+//@Require('bugcall.CallManager')
+//@Require('bugcall.CallRequester')
 //@Require('bugioc.ArgAnnotation')
 //@Require('bugioc.ConfigurationAnnotation')
 //@Require('bugioc.IConfiguration')
@@ -20,7 +23,6 @@
 //@Require('minerbugworker.MinerbugWorkerApi')
 //@Require('socketio:client.SocketIoClient')
 //@Require('socketio:client.SocketIoConfig')
-//@Require('socketio:client.SocketIoClientMessageChannel')
 //@Require('socketio:factorybrowser.BrowserSocketIoFactory')
 
 
@@ -35,10 +37,13 @@ var bugpack = require('bugpack').context();
 // BugPack
 //-------------------------------------------------------------------------------
 
-var CallManager                 = bugpack.require('CallManager');
 var Class                       = bugpack.require('Class');
 var Obj                         = bugpack.require('Obj');
 var Annotate                    = bugpack.require('annotate.Annotate');
+var BugCallClient               = bugpack.require('bugcall.BugCallClient');
+var CallClient                  = bugpack.require('bugcall.CallClient');
+var CallManager                 = bugpack.require('bugcall.CallManager');
+var CallRequester               = bugpack.require('bugcall.CallRequester');
 var ArgAnnotation               = bugpack.require('bugioc.ArgAnnotation');
 var ConfigurationAnnotation     = bugpack.require('bugioc.ConfigurationAnnotation');
 var IConfiguration              = bugpack.require('bugioc.IConfiguration');
@@ -48,7 +53,6 @@ var MinerbugWorker              = bugpack.require('minerbugworker.MinerbugWorker
 var MinerbugWorkerApi           = bugpack.require('minerbugworker.MinerbugWorkerApi');
 var SocketIoClient              = bugpack.require('socketio:client.SocketIoClient');
 var SocketIoConfig              = bugpack.require('socketio:client.SocketIoConfig');
-var SocketIoClientMessageChannel    = bugpack.require('socketio:client.SocketIoClientMessageChannel');
 var BrowserSocketIoFactory      = bugpack.require('socketio:factorybrowser.BrowserSocketIoFactory');
 
 
@@ -114,10 +118,34 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
     },
 
     /**
+     * @param {CallClient} callClient
+     * @return {CallApi}
+     */
+    bugCallClient: function(callClient) {
+        return new BugCallClient(callClient);
+    },
+
+    /**
+     * @param {SocketIoClient} socketIoClient
+     * @return {CallApi}
+     */
+    callClient: function(socketIoClient) {
+        return new CallClient(socketIoClient);
+    },
+
+    /**
      * @return {CallManager}
      */
     callManager: function() {
         return new CallManager();
+    },
+
+    /**
+     * @param {CallManager} callManager
+     * @return {CallRequester}
+     */
+    callRequester: function(callManager) {
+        return new CallRequester(callManager);
     },
 
     /**
@@ -129,12 +157,11 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
     },
 
     /**
-     * @param {CallManager} callManager
-     * @param {SocketIoClientMessageChannel} socketIoClientMessageChannel
+     * @param {CallApi} callApi
      * @return {MinerbugWorkerApi}
      */
-    minerbugWorkerApi: function(callManager, socketIoClientMessageChannel) {
-        return new MinerbugWorkerApi(callManager, socketIoClientMessageChannel);
+    minerbugWorkerApi: function(callApi) {
+        return new MinerbugWorkerApi(callApi);
     },
 
     /**
@@ -154,14 +181,6 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
             host: "http://localhost/minerbug-worker",
             port: 8000
         })
-    },
-
-    /**
-     * @param {SocketIoClient} socketIoClient
-     * @return {SocketIoClientMessageChannel}
-     */
-    socketIoClientMessageChannel: function(socketIoClient) {
-        return new SocketIoClientMessageChannel(socketIoClient);
     }
 });
 
@@ -180,26 +199,28 @@ Class.implement(MinerbugWorkerConfiguration, IConfiguration);
 annotate(MinerbugWorkerConfiguration).with(
     configuration().modules([
         module("browserSocketIoFactory"),
-        module("callManager"),
+        module("bugCallClient")
+            .args([
+                arg("callClient").ref("callClient")
+            ]),
+        module("callClient")
+            .args([
+                arg("socketIoClient").ref("socketIoClient")
+            ]),
         module("minerbugWorker")
-            .properties([
-                property("socketIoClient").ref("socketIoClient")
+            .args([
+                arg("minerbugWorkerApi").ref("minerbugWorkerApi")
             ]),
         module("minerbugWorkerApi")
             .args([
-                arg("callManager").ref("callManager"),
-                arg("socketIoClientMessageChannel").ref("socketIoClientMessageChannel")
+                arg("callApi").ref("callApi")
             ]),
         module("socketIoClient")
             .args([
                 arg("socketFactory").ref("browserSocketIoFactory"),
                 arg("config").ref("socketIoConfig")
             ]),
-        module("socketIoConfig"),
-        module("SocketIoClientMessageChannel")
-            .args([
-                arg("socketIoClient").ref("socketIoClient")
-            ])
+        module("socketIoConfig")
     ])
 );
 

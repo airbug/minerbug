@@ -51,7 +51,7 @@ var MinerbugWorker = Class.extend(Obj, {
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function() {
+    _constructor: function(minerbugWorkerApi) {
 
         this._super();
 
@@ -62,15 +62,15 @@ var MinerbugWorker = Class.extend(Obj, {
 
         /**
          * @private
-         * @type {MinerbugWorkerApi}
+         * @type {WorkAssignment}
          */
-        this.minerbugWorkerApi = null;
+        this.currentWorkAssignment = null;
 
         /**
          * @private
-         * @type {WorkAssignmentCall}
+         * @type {MinerbugWorkerApi}
          */
-        this.workAssignmentCall = null;
+        this.minerbugWorkerApi = minerbugWorkerApi;
     },
 
 
@@ -95,8 +95,7 @@ var MinerbugWorker = Class.extend(Obj, {
      * @private
      */
     cleanupWorkAssignment: function() {
-        this.workAssignmentCall.cleanup();
-        this.workAssignmentCall = null;
+        this.currentWorkAssignment = null;
     },
 
     /**
@@ -104,19 +103,33 @@ var MinerbugWorker = Class.extend(Obj, {
      * @param {*} results
      */
     completeWorkAssignment: function(results) {
-         this.workAssignmentCall.completeWorkAssignment(results);
+        var _this = this;
+        this.minerbugWorkerApi.completeWorkAssignment(this.currentWorkAssignment, results, function(exception) {
+            if (!exception) {
+                _this.cleanupWorkAssignment();
+                _this.requestWorkAssignment();
+            }
+         })
     },
 
     /**
      * @private
      */
     requestWorkAssignment: function() {
-        var workAssignmentCall = this.minerbugWorkerApi.workAssignment();
-        workAssignmentCall.onWorkAssignmentReceived(this.hearWorkAssignmentReceivedEvent, this);
-        workAssignmentCall.onWorkAssignmentSignOffReceived(this.hearWorkAssignmentSignOffReceivedEvent, this);
-        workAssignmentCall.on(Call.EventTypes.ERROR, this.hearCallErrorEvent, this);
-        workAssignmentCall.requestWorkAssignment();
-        this.workAssignmentCall = workAssignmentCall;
+        var _this = this;
+        if (!this.currentWorkAssignment) {
+            this.minerbugWorkerApi.requestWorkAssignment(function(exception, workAssignment) {
+                if (!exception) {
+                    _this.startWorkAssignment(workAssignment);
+                } else {
+                    if (exception.getType() === "requestFailed") {
+                        //TODO BRN: Start a connection check that will continually try to reconnect until the connection comes back.
+                    }
+                }
+            });
+        } else {
+            throw new Error("Can only handle one work assignment at a time");
+        }
     },
 
     /**
@@ -128,6 +141,7 @@ var MinerbugWorker = Class.extend(Obj, {
         var task = workAssignment.getTask();
         var data = workAssignment.getData();
         var taskRunner = new TaskRunner(task);
+        this.currentWorkAssignment = workAssignment;
         taskRunner.runTask(data, function(error, results) {
             if (!error) {
                 _this.completeWorkAssignment(results);
@@ -135,37 +149,6 @@ var MinerbugWorker = Class.extend(Obj, {
                 //TODO BRN: Handle errors
             }
         });
-    },
-
-
-    //-------------------------------------------------------------------------------
-    // Event Listeners
-    //-------------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {Event} event
-     */
-    hearCallErrorEvent: function(event) {
-        //TODO BRN: What do we do here?
-    },
-
-    /**
-     * @private
-     * @param {Event} event
-     */
-    hearWorkAssignmentReceivedEvent: function(event) {
-        var workAssignment = event.getData().workAssignment;
-        this.startWorkAssignment(workAssignment);
-    },
-
-    /**
-     * @private
-     * @param {Event} event
-     */
-    hearWorkAssignmentSignOffReceivedEvent: function(event) {
-        this.cleanupWorkAssignment();
-        this.requestWorkAssignment();
     }
 });
 

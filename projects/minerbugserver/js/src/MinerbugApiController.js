@@ -11,9 +11,8 @@
 //@Require('MessageReceiver')
 //@Require('Obj')
 //@Require('bugflow.BugFlow')
-//@Require('socketio:server.SocketIoConnection')
-//@Require('socketio:server.SocketIoConnectionMessageChannel')
 //@Require('socketio:server.SocketIoManager')
+//@Require('socketio:socket.SocketIoConnection')
 
 
 //-------------------------------------------------------------------------------
@@ -32,9 +31,8 @@ var Map                                 = bugpack.require('Map');
 var MessageReceiver                     = bugpack.require('MessageReceiver');
 var Obj                                 = bugpack.require('Obj');
 var BugFlow                             = bugpack.require('bugflow.BugFlow');
-var SocketIoConnection                  = bugpack.require('socketio:server.SocketIoConnection');
-var SocketIoConnectionMessageChannel = bugpack.require('socketio:server.SocketIoConnectionMessageChannel');
 var SocketIoManager                     = bugpack.require('socketio:server.SocketIoManager');
+var SocketIoConnection                  = bugpack.require('socketio:socket.SocketIoConnection');
 
 
 //-------------------------------------------------------------------------------
@@ -57,7 +55,7 @@ var MinerbugApiController = Class.extend(Obj, {
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function(){
+    _constructor: function() {
 
         this._super();
 

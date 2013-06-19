@@ -8,10 +8,10 @@
 //@Autoload
 
 //@Require('Class')
-//@Require('MessagePublisher')
-//@Require('MessageRouter')
 //@Require('Obj')
 //@Require('annotate.Annotate')
+//@Require('bugcall.BugCallServer')
+//@Require('bugcall.CallSever')
 //@Require('bugflow.BugFlow')
 //@Require('bugfs.BugFs')
 //@Require('bugioc.ArgAnnotation')
@@ -19,6 +19,7 @@
 //@Require('bugioc.IConfiguration')
 //@Require('bugioc.ModuleAnnotation')
 //@Require('bugioc.PropertyAnnotation')
+//@Require('bugroutes.BugCallRouter')
 //@Require('express.ExpressApp')
 //@Require('express.ExpressServer')
 //@Require('minerbugserver.MinerbugApiController')
@@ -36,7 +37,7 @@
 
 var bugpack     = require('bugpack').context();
 var express     = require('express');
-var mu2Express  = require("mu2express");
+var mu2express  = require("mu2express");
 
 
 //-------------------------------------------------------------------------------
@@ -44,10 +45,10 @@ var mu2Express  = require("mu2express");
 //-------------------------------------------------------------------------------
 
 var Class                       = bugpack.require('Class');
-var MessagePublisher            = bugpack.require('MessagePublisher');
-var MessageRouter               = bugpack.require('MessageRouter');
 var Obj                         = bugpack.require('Obj');
 var Annotate                    = bugpack.require('annotate.Annotate');
+var BugCallServer               = bugpack.require('bugcall.BugCallServer');
+var CallServer                  = bugpack.require('bugcall.CallServer');
 var BugFlow                     = bugpack.require('bugflow.BugFlow');
 var BugFs                       = bugpack.require('bugfs.BugFs');
 var ArgAnnotation               = bugpack.require('bugioc.ArgAnnotation');
@@ -55,6 +56,7 @@ var ConfigurationAnnotation     = bugpack.require('bugioc.ConfigurationAnnotatio
 var IConfiguration              = bugpack.require('bugioc.IConfiguration');
 var ModuleAnnotation            = bugpack.require('bugioc.ModuleAnnotation');
 var PropertyAnnotation          = bugpack.require('bugioc.PropertyAnnotation');
+var BugCallRouter               = bugpack.require('bugroutes.BugCallRouter');
 var ExpressApp                  = bugpack.require('express.ExpressApp');
 var ExpressServer               = bugpack.require('express.ExpressServer');
 var MinerbugApiController       = bugpack.require('minerbugserver.MinerbugApiController');
@@ -157,11 +159,11 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
 
     /**
      * @param {function(Error)}
-        */
+     */
     initializeConfiguration: function(callback) {
         var _this = this;
         this._expressApp.configure(function() {
-            _this._expressApp.engine('mustache', mu2Express.engine);
+            _this._expressApp.engine('mustache', mu2express.engine);
             _this._expressApp.set('view engine', 'mustache');
             _this._expressApp.set('views', BugFs.resolvePaths([__dirname, '../../resources/views']));
 
@@ -178,7 +180,8 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
             _this._expressApp.use(express.errorHandler());
         });
 
-
+        this._socketIoServerConfig.set('resource', '/home');
+        //this._socketIoServer.set('resource', '/home');
 
 
         $series([
@@ -221,6 +224,30 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
     //-------------------------------------------------------------------------------
 
     /**
+     * @param {BugCallServer} bugCallServer
+     * @return {BugCallRouter}
+     */
+    bugCallRouter: function(bugCallServer) {
+        return new BugCallRouter(bugCallServer);
+    },
+
+    /**
+     * @param {CallServer} callServer
+     * @return {BugCallServer}
+     */
+    bugCallServer: function(callServer) {
+        return new BugCallServer(callServer);
+    },
+
+    /**
+     * @param {SocketIoManager}
+        * @return {CallServer}
+     */
+    callServer: function(socketIoManager) {
+        return new CallServer(socketIoManager);
+    },
+
+    /**
      * @return {ExpressApp}
      */
     expressApp: function() {
@@ -238,25 +265,12 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
     },
 
     /**
+     * @param {
      * @return {MinerbugApiController}
      */
-    minerbugApiController: function() {
+    minerbugApiController: function(bugCallRouter) {
         this._minerbugApiController = new MinerbugApiController();
         return this._minerbugApiController;
-    },
-
-    /**
-     * @return {MessagePublisher}
-     */
-    minerbugApiIncomingMessagePublisher: function() {
-        return new MessagePublisher();
-    },
-
-    /**
-     * @return {MessageRouter}
-     */
-    minerbugApiOutgoingMessageRouter: function() {
-        return new MessageRouter();
     },
 
     /**
@@ -274,20 +288,6 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
     minerbugWorkerController: function() {
         this._minerbugWorkerController = new MinerbugWorkerController();
         return this._minerbugWorkerController;
-    },
-
-    /**
-     * @return {MessagePublisher}
-     */
-    minerbugWorkerIncomingMessagePublisher: function() {
-        return new MessagePublisher();
-    },
-
-    /**
-     * @return {MessageRouter}
-     */
-    minerbugWorkerOutgoingMessageRouter: function() {
-        return new MessageRouter();
     },
 
     /**
@@ -313,7 +313,8 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
      * @return {SocketIoServerConfig}
      */
     socketIoServerConfig: function() {
-        return new SocketIoServerConfig({});
+        this._socketIoServerConfig = new SocketIoServerConfig({});
+        return this._socketIoServerConfig;
     },
 
     /**
