@@ -13,7 +13,6 @@
 //@Require('bugcall.BugCallClient')
 //@Require('bugcall.CallClient')
 //@Require('bugcall.CallManager')
-//@Require('bugcall.CallRequester')
 //@Require('bugioc.ArgAnnotation')
 //@Require('bugioc.ConfigurationAnnotation')
 //@Require('bugioc.IConfiguration')
@@ -43,7 +42,6 @@ var Annotate                    = bugpack.require('annotate.Annotate');
 var BugCallClient               = bugpack.require('bugcall.BugCallClient');
 var CallClient                  = bugpack.require('bugcall.CallClient');
 var CallManager                 = bugpack.require('bugcall.CallManager');
-var CallRequester               = bugpack.require('bugcall.CallRequester');
 var ArgAnnotation               = bugpack.require('bugioc.ArgAnnotation');
 var ConfigurationAnnotation     = bugpack.require('bugioc.ConfigurationAnnotation');
 var IConfiguration              = bugpack.require('bugioc.IConfiguration');
@@ -88,6 +86,12 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
 
         /**
          * @private
+         * @type {BugCallClient}
+         */
+        this._bugCallClient = null;
+
+        /**
+         * @private
          * @type {MinerbugWorker}
          */
         this._minerbugWorker = null;
@@ -122,7 +126,8 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
      * @return {CallApi}
      */
     bugCallClient: function(callClient) {
-        return new BugCallClient(callClient);
+        this._bugCallClient = new BugCallClient(callClient);
+        return this._bugCallClient;
     },
 
     /**
@@ -138,14 +143,6 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
      */
     callManager: function() {
         return new CallManager();
-    },
-
-    /**
-     * @param {CallManager} callManager
-     * @return {CallRequester}
-     */
-    callRequester: function(callManager) {
-        return new CallRequester(callManager);
     },
 
     /**
