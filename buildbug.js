@@ -57,7 +57,7 @@ buildProperties({
         sourcePaths: [
             "./projects/minerbug/js/src",
             "./projects/minerbugserver/js/src",
-            "../bugjs/projects/annotate/js/src",
+            "../bugjs/projects/bugmeta/js/src",
             "../bugjs/projects/bugcall/js/src",
             "../bugjs/projects/bugflow/js/src",
             "../bugjs/projects/bugfs/js/src",
@@ -109,7 +109,7 @@ buildProperties({
         sourcePaths: [
             "./projects/minerbug/js/src",
             "./projects/minerbugapi/js/src",
-            "../bugjs/projects/annotate/js/src",
+            "../bugjs/projects/bugmeta/js/src",
             '../bugjs/projects/bugflow/js/src',
             "../bugjs/projects/bugjs/js/src",
             "../bugjs/projects/bugtrace/js/src",

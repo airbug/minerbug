@@ -9,7 +9,7 @@
 
 //@Require('Class')
 //@Require('Obj')
-//@Require('annotate.Annotate')
+//@Require('bugmeta.BugMeta')
 //@Require('bugcall.BugCallClient')
 //@Require('bugcall.CallClient')
 //@Require('bugcall.CallManager')
@@ -38,7 +38,7 @@ var bugpack = require('bugpack').context();
 
 var Class                       = bugpack.require('Class');
 var Obj                         = bugpack.require('Obj');
-var Annotate                    = bugpack.require('annotate.Annotate');
+var BugMeta = bugpack.require('bugmeta.BugMeta');
 var BugCallClient               = bugpack.require('bugcall.BugCallClient');
 var CallClient                  = bugpack.require('bugcall.CallClient');
 var CallManager                 = bugpack.require('bugcall.CallManager');
@@ -58,7 +58,7 @@ var BrowserSocketIoFactory      = bugpack.require('socketio:factorybrowser.Brows
 // Simplify References
 //-------------------------------------------------------------------------------
 
-var annotate =      Annotate.annotate;
+var bugmeta = BugMeta.context();
 var arg =           ArgAnnotation.arg;
 var configuration = ConfigurationAnnotation.configuration;
 var module =        ModuleAnnotation.module;
@@ -190,32 +190,32 @@ Class.implement(MinerbugWorkerConfiguration, IConfiguration);
 
 
 //-------------------------------------------------------------------------------
-// Annotate
+// BugMeta
 //-------------------------------------------------------------------------------
 
-annotate(MinerbugWorkerConfiguration).with(
+bugmeta.annotate(MinerbugWorkerConfiguration).with(
     configuration().modules([
         module("browserSocketIoFactory"),
         module("bugCallClient")
             .args([
-                arg("callClient").ref("callClient")
+                arg().ref("callClient")
             ]),
         module("callClient")
             .args([
-                arg("socketIoClient").ref("socketIoClient")
+                arg().ref("socketIoClient")
             ]),
         module("minerbugWorker")
             .args([
-                arg("minerbugWorkerApi").ref("minerbugWorkerApi")
+                arg().ref("minerbugWorkerApi")
             ]),
         module("minerbugWorkerApi")
             .args([
-                arg("callApi").ref("callApi")
+                arg().ref("callApi")
             ]),
         module("socketIoClient")
             .args([
-                arg("socketFactory").ref("browserSocketIoFactory"),
-                arg("config").ref("socketIoConfig")
+                arg().ref("browserSocketIoFactory"),
+                arg().ref("socketIoConfig")
             ]),
         module("socketIoConfig")
     ])

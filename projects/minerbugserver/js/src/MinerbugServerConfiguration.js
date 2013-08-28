@@ -9,7 +9,6 @@
 
 //@Require('Class')
 //@Require('Obj')
-//@Require('annotate.Annotate')
 //@Require('bugcall.BugCallServer')
 //@Require('bugcall.CallSever')
 //@Require('bugflow.BugFlow')
@@ -19,6 +18,7 @@
 //@Require('bugioc.IConfiguration')
 //@Require('bugioc.ModuleAnnotation')
 //@Require('bugioc.PropertyAnnotation')
+//@Require('bugmeta.BugMeta')
 //@Require('bugroutes.BugCallRouter')
 //@Require('express.ExpressApp')
 //@Require('express.ExpressServer')
@@ -46,7 +46,6 @@ var mu2express  = require("mu2express");
 
 var Class                       = bugpack.require('Class');
 var Obj                         = bugpack.require('Obj');
-var Annotate                    = bugpack.require('annotate.Annotate');
 var BugCallServer               = bugpack.require('bugcall.BugCallServer');
 var CallServer                  = bugpack.require('bugcall.CallServer');
 var BugFlow                     = bugpack.require('bugflow.BugFlow');
@@ -56,6 +55,7 @@ var ConfigurationAnnotation     = bugpack.require('bugioc.ConfigurationAnnotatio
 var IConfiguration              = bugpack.require('bugioc.IConfiguration');
 var ModuleAnnotation            = bugpack.require('bugioc.ModuleAnnotation');
 var PropertyAnnotation          = bugpack.require('bugioc.PropertyAnnotation');
+var BugMeta                     = bugpack.require('bugmeta.BugMeta');
 var BugCallRouter               = bugpack.require('bugroutes.BugCallRouter');
 var ExpressApp                  = bugpack.require('express.ExpressApp');
 var ExpressServer               = bugpack.require('express.ExpressServer');
@@ -72,8 +72,8 @@ var SocketIoServerConfig        = bugpack.require('socketio:server.SocketIoServe
 // Simplify References
 //-------------------------------------------------------------------------------
 
-var annotate        = Annotate.annotate;
 var arg             = ArgAnnotation.arg;
+var bugmeta         = BugMeta.context();
 var configuration   = ConfigurationAnnotation.configuration;
 var module          = ModuleAnnotation.module;
 var property        = PropertyAnnotation.property;
@@ -343,15 +343,15 @@ Class.implement(MinerbugServerConfiguration, IConfiguration);
 
 
 //-------------------------------------------------------------------------------
-// Annotate
+// BugMeta
 //-------------------------------------------------------------------------------
 
-annotate(MinerbugServerConfiguration).with(
+bugmeta.annotate(MinerbugServerConfiguration).with(
     configuration().modules([
         module("expressApp"),
         module("expressServer")
             .args([
-                arg("expressApp").ref("expressApp")
+                arg().ref("expressApp")
             ]),
         module("minerbugApiController")
             .properties([
@@ -364,7 +364,7 @@ annotate(MinerbugServerConfiguration).with(
         module("minerbugApiOutgoingMessageRouter"),
         module("minerbugApiSocketManager")
             .args([
-                arg("socketIoServer").ref("socketIoServer")
+                arg().ref("socketIoServer")
             ]),
         module("minerbugWorkerController")
             .properties([
@@ -377,12 +377,12 @@ annotate(MinerbugServerConfiguration).with(
         module("minerbugWorkerOutgoingMessageRouter"),
         module("minerbugWorkerSocketManager")
             .args([
-                arg("socketIoServer").ref("socketIoServer")
+                arg().ref("socketIoServer")
             ]),
         module("socketIoServer").
             args([
-                arg("config").ref("socketIoServerConfig"),
-                arg("expressServer").ref("expressServer")
+                arg().ref("socketIoServerConfig"),
+                arg().ref("expressServer")
             ]),
         module("socketIoServerConfig"),
         module("jobManager"),
