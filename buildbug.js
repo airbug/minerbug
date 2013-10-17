@@ -86,8 +86,8 @@ buildProperties({
         ],
         staticPaths: [
             "./projects/minerbugserver/static",
-            "../bugjs/external/bootstrap/js/src",
-            "../bugjs/external/bootstrap/static",
+            "../bugjs/external/bootstrap3/js/src",
+            "../bugjs/external/bootstrap3/static",
             "../bugjs/external/jquery/js/src",
             "../bugjs/external/mustache/js/src",
             "../bugjs/external/socket-io/js/src",
