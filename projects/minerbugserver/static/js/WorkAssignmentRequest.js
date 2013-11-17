@@ -44,7 +44,7 @@ var WorkAssignmentCall = Class.extend(Call, {
         this._super(callManager);
 
         //-------------------------------------------------------------------------------
-        // Declare Variables
+        // Private Properties
         //-------------------------------------------------------------------------------
 
         /**
