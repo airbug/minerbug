@@ -99,11 +99,18 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
 
 
     //-------------------------------------------------------------------------------
-    // Configuration Lifecycle
+    // IConfiguration Implementation
     //-------------------------------------------------------------------------------
 
     /**
-     * @param {function(Error)}
+     * @param {function(Throwable=)} callback
+     */
+    deinitializeConfiguration: function(callback) {
+        callback();
+    },
+
+    /**
+     * @param {function(Throwable=)} callback
         */
     initializeConfiguration: function(callback) {
         this._minerbugWorker.start(callback);
@@ -111,7 +118,7 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
 
 
     //-------------------------------------------------------------------------------
-    // Configuration Methods
+    // Public Methods
     //-------------------------------------------------------------------------------
 
     /**
@@ -194,7 +201,7 @@ Class.implement(MinerbugWorkerConfiguration, IConfiguration);
 //-------------------------------------------------------------------------------
 
 bugmeta.annotate(MinerbugWorkerConfiguration).with(
-    configuration().modules([
+    configuration("minerbugWorkerConfiguration").modules([
         module("browserSocketIoFactory"),
         module("bugCallClient")
             .args([

@@ -154,11 +154,18 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
 
 
     //-------------------------------------------------------------------------------
-    // Configuration Lifecycle
+    // IConfiguration Implementation
     //-------------------------------------------------------------------------------
 
     /**
-     * @param {function(Error)}
+     * @param {function(Throwable=)} callback
+     */
+    deinitializeConfiguration: function(callback) {
+        callback();
+    },
+
+    /**
+     * @param {function(Throwable=)} callback
      */
     initializeConfiguration: function(callback) {
         var _this = this;
@@ -220,7 +227,7 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
 
 
     //-------------------------------------------------------------------------------
-    // Configuration Methods
+    // Public Methods
     //-------------------------------------------------------------------------------
 
     /**
@@ -347,7 +354,7 @@ Class.implement(MinerbugServerConfiguration, IConfiguration);
 //-------------------------------------------------------------------------------
 
 bugmeta.annotate(MinerbugServerConfiguration).with(
-    configuration().modules([
+    configuration("minerbugServerConfiguration").modules([
         module("expressApp"),
         module("expressServer")
             .args([
