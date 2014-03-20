@@ -12,7 +12,7 @@
 //@Require('bugmeta.BugMeta')
 //@Require('bugcall.BugCallClient')
 //@Require('bugcall.CallClient')
-//@Require('bugcall.CallManager')
+//@Require('bugcall.Call')
 //@Require('bugioc.ArgAnnotation')
 //@Require('bugioc.ConfigurationAnnotation')
 //@Require('bugioc.IConfiguration')
@@ -41,7 +41,7 @@ var Obj                         = bugpack.require('Obj');
 var BugMeta = bugpack.require('bugmeta.BugMeta');
 var BugCallClient               = bugpack.require('bugcall.BugCallClient');
 var CallClient                  = bugpack.require('bugcall.CallClient');
-var CallManager                 = bugpack.require('bugcall.CallManager');
+var Call                 = bugpack.require('bugcall.Call');
 var ArgAnnotation               = bugpack.require('bugioc.ArgAnnotation');
 var ConfigurationAnnotation     = bugpack.require('bugioc.ConfigurationAnnotation');
 var IConfiguration              = bugpack.require('bugioc.IConfiguration');
@@ -146,10 +146,10 @@ var MinerbugWorkerConfiguration = Class.extend(Obj, {
     },
 
     /**
-     * @return {CallManager}
+     * @return {Call}
      */
-    callManager: function() {
-        return new CallManager();
+    call: function() {
+        return new Call();
     },
 
     /**

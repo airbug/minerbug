@@ -39,9 +39,9 @@ var WorkAssignmentCall = Class.extend(Call, {
     // Constructor
     //-------------------------------------------------------------------------------
 
-    _constructor: function(callManager) {
+    _constructor: function(call) {
 
-        this._super(callManager);
+        this._super(call);
 
         //-------------------------------------------------------------------------------
         // Private Properties

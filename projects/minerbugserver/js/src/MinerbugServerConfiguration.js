@@ -35,9 +35,10 @@
 // Common Modules
 //-------------------------------------------------------------------------------
 
-var bugpack     = require('bugpack').context();
-var express     = require('express');
-var mu2express  = require("mu2express");
+var bugpack                     = require('bugpack').context();
+var express                     = require('express');
+var http                        = require('http');
+var mu2express                  = require("mu2express");
 
 
 //-------------------------------------------------------------------------------
@@ -72,13 +73,13 @@ var SocketIoServerConfig        = bugpack.require('socketio:server.SocketIoServe
 // Simplify References
 //-------------------------------------------------------------------------------
 
-var arg             = ArgAnnotation.arg;
-var bugmeta         = BugMeta.context();
-var configuration   = ConfigurationAnnotation.configuration;
-var module          = ModuleAnnotation.module;
-var property        = PropertyAnnotation.property;
-var $series         = BugFlow.$series;
-var $task           = BugFlow.$task;
+var arg                         = ArgAnnotation.arg;
+var bugmeta                     = BugMeta.context();
+var configuration               = ConfigurationAnnotation.configuration;
+var module                      = ModuleAnnotation.module;
+var property                    = PropertyAnnotation.property;
+var $series                     = BugFlow.$series;
+var $task                       = BugFlow.$task;
 
 
 //-------------------------------------------------------------------------------
@@ -255,20 +256,36 @@ var MinerbugServerConfiguration = Class.extend(Obj, {
     },
 
     /**
+     * @return {Express}
+     */
+    express: function() {
+        return express;
+    },
+
+    /**
+     * @param {Express} express
      * @return {ExpressApp}
      */
-    expressApp: function() {
-        this._expressApp = new ExpressApp();
+    expressApp: function(express) {
+        this._expressApp = new ExpressApp(express);
         return this._expressApp;
     },
 
     /**
+     * @param {http} http
      * @param {ExpressApp} expressApp
      * @return {ExpressServer}
      */
-    expressServer: function(expressApp) {
-        this._expressServer = new ExpressServer(expressApp);
+    expressServer: function(http, expressApp) {
+        this._expressServer = new ExpressServer(http, expressApp);
         return this._expressServer;
+    },
+
+    /**
+     * @return {*}
+     */
+    http: function() {
+        return http;
     },
 
     /**
@@ -355,11 +372,17 @@ Class.implement(MinerbugServerConfiguration, IConfiguration);
 
 bugmeta.annotate(MinerbugServerConfiguration).with(
     configuration("minerbugServerConfiguration").modules([
-        module("expressApp"),
+        module("express"),
+        module("expressApp")
+            .args([
+                arg().ref("express")
+            ]),
         module("expressServer")
             .args([
+                arg().ref("http"),
                 arg().ref("expressApp")
             ]),
+        module("http"),
         module("minerbugApiController")
             .properties([
                 property("expressApp").ref("expressApp"),

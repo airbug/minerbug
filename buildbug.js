@@ -314,11 +314,6 @@ buildTarget('local').buildFlow(
                         });
                     }
                 }),
-                targetTask("s3EnsureBucket", {
-                    properties: {
-                        bucket: buildProject.getProperty("local-bucket")
-                    }
-                }),
                 targetTask("s3PutFile", {
                     init: function(task, buildProject, properties) {
                         var packedNodePackage = nodejs.findPackedNodePackage(buildProject.getProperty("minerbugserver.packageJson.name"),
@@ -379,11 +374,6 @@ buildTarget('local').buildFlow(
                         });
                     }
                 }),
-                targetTask("s3EnsureBucket", {
-                    properties: {
-                        bucket: buildProject.getProperty("local-bucket")
-                    }
-                }),
                 targetTask("s3PutFile", {
                     init: function(task, buildProject, properties) {
                         var packedNodePackage = nodejs.findPackedNodePackage(buildProject.getProperty("minerbugapi.packageJson.name"),
@@ -427,11 +417,6 @@ buildTarget('testfile').buildFlow(
             }),
             targetTask("gzipFile", {
         
-            }),
-            targetTask("s3EnsureBucket", {
-                properties: {
-                    bucket: buildProject.getProperty("local-bucket")
-                }
             }),
             targetTask("s3PutFile", {
                 init: function(task, buildProject, properties) {
