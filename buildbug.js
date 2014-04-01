@@ -44,7 +44,7 @@ buildProperties({
             version: "0.0.1",
             //main: "./lib/minerbug-module.js",
             dependencies: {
-                "bugpack": "https://s3.amazonaws.com/airbug/bugpack-0.0.5.tgz",
+                "bugpack": "https://s3.amazonaws.com/deploy-airbug/bugpack-0.0.5.tgz",
                 "express": "3.1.x",
                 "fstream": '0.1.x',
                 "mu2express": "0.0.x",
@@ -102,7 +102,7 @@ buildProperties({
             version: "0.0.1",
             main: "./scripts/minerbugapi-module.js",
             dependencies: {
-                "bugpack": "https://s3.amazonaws.com/airbug/bugpack-0.0.5.tgz",
+                "bugpack": "https://s3.amazonaws.com/deploy-airbug/bugpack-0.0.5.tgz",
                 "socket.io-client": "0.9.x"
             }
         },
