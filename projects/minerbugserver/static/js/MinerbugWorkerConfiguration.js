@@ -13,11 +13,11 @@
 //@Require('bugcall.BugCallClient')
 //@Require('bugcall.CallClient')
 //@Require('bugcall.Call')
-//@Require('bugioc.ArgAnnotation')
-//@Require('bugioc.ConfigurationAnnotation')
+//@Require('bugioc.ArgTag')
+//@Require('bugioc.ConfigurationTag')
 //@Require('bugioc.IConfiguration')
-//@Require('bugioc.ModuleAnnotation')
-//@Require('bugioc.PropertyAnnotation')
+//@Require('bugioc.ModuleTag')
+//@Require('bugioc.PropertyTag')
 //@Require('minerbugworker.MinerbugWorker')
 //@Require('minerbugworker.MinerbugWorkerApi')
 //@Require('socketio:client.SocketIoClient')
@@ -42,11 +42,11 @@ var BugMeta = bugpack.require('bugmeta.BugMeta');
 var BugCallClient               = bugpack.require('bugcall.BugCallClient');
 var CallClient                  = bugpack.require('bugcall.CallClient');
 var Call                 = bugpack.require('bugcall.Call');
-var ArgAnnotation               = bugpack.require('bugioc.ArgAnnotation');
-var ConfigurationAnnotation     = bugpack.require('bugioc.ConfigurationAnnotation');
+var ArgTag               = bugpack.require('bugioc.ArgTag');
+var ConfigurationTag     = bugpack.require('bugioc.ConfigurationTag');
 var IConfiguration              = bugpack.require('bugioc.IConfiguration');
-var ModuleAnnotation            = bugpack.require('bugioc.ModuleAnnotation');
-var PropertyAnnotation          = bugpack.require('bugioc.PropertyAnnotation');
+var ModuleTag            = bugpack.require('bugioc.ModuleTag');
+var PropertyTag          = bugpack.require('bugioc.PropertyTag');
 var MinerbugWorker              = bugpack.require('minerbugworker.MinerbugWorker');
 var MinerbugWorkerApi           = bugpack.require('minerbugworker.MinerbugWorkerApi');
 var SocketIoClient              = bugpack.require('socketio:client.SocketIoClient');
@@ -59,10 +59,10 @@ var BrowserSocketIoFactory      = bugpack.require('socketio:factorybrowser.Brows
 //-------------------------------------------------------------------------------
 
 var bugmeta = BugMeta.context();
-var arg =           ArgAnnotation.arg;
-var configuration = ConfigurationAnnotation.configuration;
-var module =        ModuleAnnotation.module;
-var property =      PropertyAnnotation.property;
+var arg =           ArgTag.arg;
+var configuration = ConfigurationTag.configuration;
+var module =        ModuleTag.module;
+var property =      PropertyTag.property;
 
 
 //-------------------------------------------------------------------------------
@@ -200,7 +200,7 @@ Class.implement(MinerbugWorkerConfiguration, IConfiguration);
 // BugMeta
 //-------------------------------------------------------------------------------
 
-bugmeta.annotate(MinerbugWorkerConfiguration).with(
+bugmeta.tag(MinerbugWorkerConfiguration).with(
     configuration("minerbugWorkerConfiguration").modules([
         module("browserSocketIoFactory"),
         module("bugCallClient")
