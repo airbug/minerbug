@@ -13,10 +13,10 @@
 //@Require('bugcall.CallApi')
 //@Require('bugcall.CallClient')
 //@Require('minerbugapi.JobBuilder')
-//@Require('socketio:client.SocketIoClient')
-//@Require('socketio:client.SocketIoConfig')
-//@Require('socketio:client.SocketIoClientChannel')
-//@Require('socketio:factoryserver.ServerSocketIoFactory')
+//@Require('socketio.SocketIoClient')
+//@Require('socketio.SocketIoConfig')
+//@Require('socketio.SocketIoClientChannel')
+//@Require('socketio.ServerSocketIoFactory')
 
 
 //-------------------------------------------------------------------------------
@@ -37,10 +37,10 @@ var BugFlow                 = bugpack.require('bugflow.BugFlow');
 var CallApi                 = bugpack.require('bugcall.CallApi');
 var CallClient              = bugpack.require('bugcall.CallClient');
 var JobBuilder              = bugpack.require('minerbugapi.JobBuilder');
-var SocketIoClient          = bugpack.require('socketio:client.SocketIoClient');
-var SocketIoConfig          = bugpack.require('socketio:client.SocketIoConfig');
-var SocketIoClientChannel   = bugpack.require('socketio:client.SocketIoClientChannel');
-var ServerSocketIoFactory   = bugpack.require('socketio:factoryserver.ServerSocketIoFactory');
+var SocketIoClient          = bugpack.require('socketio.SocketIoClient');
+var SocketIoConfig          = bugpack.require('socketio.SocketIoConfig');
+var SocketIoClientChannel   = bugpack.require('socketio.SocketIoClientChannel');
+var ServerSocketIoFactory   = bugpack.require('socketio.ServerSocketIoFactory');
 
 
 //-------------------------------------------------------------------------------

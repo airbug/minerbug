@@ -11,8 +11,8 @@
 //@Require('MessageReceiver')
 //@Require('Obj')
 //@Require('bugflow.BugFlow')
-//@Require('socketio:server.SocketIoManager')
-//@Require('socketio:socket.SocketIoConnection')
+//@Require('socketio.SocketIoManager')
+//@Require('socketio.SocketIoConnection')
 
 
 //-------------------------------------------------------------------------------
@@ -31,8 +31,8 @@ var Map                                 = bugpack.require('Map');
 var MessageReceiver                     = bugpack.require('MessageReceiver');
 var Obj                                 = bugpack.require('Obj');
 var BugFlow                             = bugpack.require('bugflow.BugFlow');
-var SocketIoManager                     = bugpack.require('socketio:server.SocketIoManager');
-var SocketIoConnection                  = bugpack.require('socketio:socket.SocketIoConnection');
+var SocketIoManager                     = bugpack.require('socketio.SocketIoManager');
+var SocketIoConnection                  = bugpack.require('socketio.SocketIoConnection');
 
 
 //-------------------------------------------------------------------------------

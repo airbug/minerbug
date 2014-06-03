@@ -20,9 +20,9 @@
 //@Require('bugioc.PropertyTag')
 //@Require('minerbugworker.MinerbugWorker')
 //@Require('minerbugworker.MinerbugWorkerApi')
-//@Require('socketio:client.SocketIoClient')
-//@Require('socketio:client.SocketIoConfig')
-//@Require('socketio:factorybrowser.BrowserSocketIoFactory')
+//@Require('socketio.SocketIoClient')
+//@Require('socketio.SocketIoConfig')
+//@Require('socketio.BrowserSocketIoFactory')
 
 
 //-------------------------------------------------------------------------------
@@ -49,9 +49,9 @@ var ModuleTag            = bugpack.require('bugioc.ModuleTag');
 var PropertyTag          = bugpack.require('bugioc.PropertyTag');
 var MinerbugWorker              = bugpack.require('minerbugworker.MinerbugWorker');
 var MinerbugWorkerApi           = bugpack.require('minerbugworker.MinerbugWorkerApi');
-var SocketIoClient              = bugpack.require('socketio:client.SocketIoClient');
-var SocketIoConfig              = bugpack.require('socketio:client.SocketIoConfig');
-var BrowserSocketIoFactory      = bugpack.require('socketio:factorybrowser.BrowserSocketIoFactory');
+var SocketIoClient              = bugpack.require('socketio.SocketIoClient');
+var SocketIoConfig              = bugpack.require('socketio.SocketIoConfig');
+var BrowserSocketIoFactory      = bugpack.require('socketio.BrowserSocketIoFactory');
 
 
 //-------------------------------------------------------------------------------

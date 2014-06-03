@@ -25,9 +25,9 @@
 //@Require('minerbugserver.MinerbugWorkerController')
 //@Require('minerbugserver.JobManager')
 //@Require('minerbugserver.JobProcessor')
-//@Require('socketio:server.SocketIoManager');
-//@Require('socketio:server.SocketIoServer')
-//@Require('socketio:server.SocketIoServerConfig')
+//@Require('socketio.SocketIoManager');
+//@Require('socketio.SocketIoServer')
+//@Require('socketio.SocketIoServerConfig')
 
 
 //-------------------------------------------------------------------------------
@@ -62,9 +62,9 @@ var MinerbugApiController       = bugpack.require('minerbugserver.MinerbugApiCon
 var MinerbugWorkerController    = bugpack.require('minerbugserver.MinerbugWorkerController');
 var JobManager                  = bugpack.require('minerbugserver.JobManager');
 var JobProcessor                = bugpack.require('minerbugserver.JobProcessor');
-var SocketIoManager             = bugpack.require('socketio:server.SocketIoManager');
-var SocketIoServer              = bugpack.require('socketio:server.SocketIoServer');
-var SocketIoServerConfig        = bugpack.require('socketio:server.SocketIoServerConfig');
+var SocketIoManager             = bugpack.require('socketio.SocketIoManager');
+var SocketIoServer              = bugpack.require('socketio.SocketIoServer');
+var SocketIoServerConfig        = bugpack.require('socketio.SocketIoServerConfig');
 
 
 //-------------------------------------------------------------------------------
