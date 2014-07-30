@@ -61,7 +61,7 @@ buildProperties({
             "../bugjs/projects/bugcall/js/src",
             "../bugjs/projects/bugflow/js/src",
             "../bugjs/projects/bugfs/js/src",
-            "../bugjs/projects/bugioc/js/src",
+            "../bugioc/libraries/bugioc/js/src",
             "../bugjs/projects/bugjs/js/src",
             "../bugjs/projects/bugtrace/js/src",
             "../bugjs/projects/express/js/src",
@@ -77,7 +77,7 @@ buildProperties({
         ],
         testPaths: [
             "../bugjs/projects/bugflow/js/test",
-            "../bugjs/projects/bugioc/js/test",
+            "../bugioc/libraries/bugioc/js/test",
             "../bugjs/projects/bugjs/js/test",
             "../bugjs/projects/bugtrace/js/test"
         ],

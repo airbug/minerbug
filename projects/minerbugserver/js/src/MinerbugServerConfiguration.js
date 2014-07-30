@@ -9,7 +9,7 @@
 //@Require('Obj')
 //@Require('bugcall.BugCallServer')
 //@Require('bugcall.CallSever')
-//@Require('bugflow.BugFlow')
+//@Require('Flows')
 //@Require('bugfs.BugFs')
 //@Require('bugioc.ArgTag')
 //@Require('bugioc.ConfigurationTag')
@@ -51,7 +51,7 @@ require('bugpack').context("*", function(bugpack) {
     var Obj                         = bugpack.require('Obj');
     var BugCallServer               = bugpack.require('bugcall.BugCallServer');
     var CallServer                  = bugpack.require('bugcall.CallServer');
-    var BugFlow                     = bugpack.require('bugflow.BugFlow');
+    var Flows                     = bugpack.require('Flows');
     var BugFs                       = bugpack.require('bugfs.BugFs');
     var ArgTag               = bugpack.require('bugioc.ArgTag');
     var ConfigurationTag     = bugpack.require('bugioc.ConfigurationTag');
@@ -79,8 +79,8 @@ require('bugpack').context("*", function(bugpack) {
     var configuration               = ConfigurationTag.configuration;
     var module                      = ModuleTag.module;
     var property                    = PropertyTag.property;
-    var $series                     = BugFlow.$series;
-    var $task                       = BugFlow.$task;
+    var $series                     = Flows.$series;
+    var $task                       = Flows.$task;
 
 
     //-------------------------------------------------------------------------------

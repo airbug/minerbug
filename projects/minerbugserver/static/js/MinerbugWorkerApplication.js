@@ -7,9 +7,7 @@
 
 //@Require('Class')
 //@Require('Obj')
-//@Require('bugioc.ModuleTagProcessor')
-//@Require('bugioc.ModuleTagScan')
-//@Require('bugioc.IocContext')
+//@Require('bugioc.BugIoc')
 //@Require('bugmeta.BugMeta')
 
 
@@ -25,9 +23,7 @@ require('bugpack').context("*", function(bugpack) {
 
     var Class                               = bugpack.require('Class');
     var Obj                                 = bugpack.require('Obj');
-    var IocContext                          = bugpack.require('bugioc.IocContext');
-    var ModuleTagProcessor           = bugpack.require('bugioc.ModuleTagProcessor');
-    var ModuleTagScan                          = bugpack.require('bugioc.ModuleTagScan');
+    var BugIoc                          = bugpack.require('bugioc.BugIoc');
     var BugMeta                             = bugpack.require('bugmeta.BugMeta');
 
 
@@ -64,13 +60,13 @@ require('bugpack').context("*", function(bugpack) {
              * @private
              * @type {IocContext}
              */
-            this.iocContext         = new IocContext();
+            this.iocContext             = BugIoc.context();
 
             /**
              * @private
              * @type {ModuleTagScan}
              */
-            this.moduleTagScan         = new ModuleTagScan(BugMeta.context(), new ModuleTagProcessor(this.iocContext));
+            this.moduleTagScan          = BugIoc.moduleScan(BugMeta.context());
         },
 
 
@@ -82,9 +78,13 @@ require('bugpack').context("*", function(bugpack) {
          * @param {function(Throwable=)} callback
          */
         start: function(callback) {
-            this.moduleTagScan.scanAll();
-            this.iocContext.generate();
-            this.iocContext.initialize(callback);
+            try {
+                this.moduleTagScan.scanAll();
+                this.iocContext.generate();
+            } catch(throwable) {
+                return callback(throwable);
+            }
+            this.iocContext.start(callback);
         }
     });
 
