@@ -57,42 +57,36 @@ buildProperties({
         sourcePaths: [
             "./projects/minerbug/js/src",
             "./projects/minerbugserver/js/src",
-            "../bugjs/projects/bugmeta/js/src",
-            "../bugjs/projects/bugcall/js/src",
-            "../bugjs/projects/bugflow/js/src",
-            "../bugjs/projects/bugfs/js/src",
+            "../bugcore/libraries/bugcore/js/src",
+            "../bugdouble/libraries/bugdouble/js/src",
+            "../bugfs/libraries/bugfs/js/src",
             "../bugioc/libraries/bugioc/js/src",
-            "../bugjs/projects/bugjs/js/src",
-            "../bugjs/projects/bugtrace/js/src",
             "../bugjs/projects/express/js/src",
             "../bugjs/projects/socketio/libraries/factoryserver/js/src",
             "../bugjs/projects/socketio/libraries/server/js/src",
             "../bugjs/projects/socketio/libraries/socket/js/src",
-            "../bugunit/projects/bugdouble/js/src",
-            "../bugunit/projects/bugunit/js/src"
+            "../bugmeta/libraries/bugmeta/js/src",
+            "../bugunit/libraries/bugunit/js/src"
         ],
         scriptPaths: [
             "./projects/minerbugserver/js/scripts",
-            "../bugunit/projects/bugunit/js/scripts"
+            "../bugunit/libraries/bugunit/js/scripts"
         ],
         testPaths: [
-            "../bugjs/projects/bugflow/js/test",
-            "../bugioc/libraries/bugioc/js/test",
-            "../bugjs/projects/bugjs/js/test",
-            "../bugjs/projects/bugtrace/js/test"
+            "../bugcore/libraries/bugcore/js/test",
+            "../bugioc/libraries/bugioc/js/test"
         ],
         resourcePaths: [
             "./projects/minerbugserver/resources"
         ],
         staticPaths: [
             "./projects/minerbugserver/static",
+            "../bugcore/libraries/bugcore/js/src",
             "../bugjs/external/bootstrap3/js/src",
             "../bugjs/external/bootstrap3/static",
             "../bugjs/external/jquery/js/src",
             "../bugjs/external/mustache/js/src",
             "../bugjs/external/socket-io/js/src",
-            "../bugjs/projects/bugcall/js/src",
-            "../bugjs/projects/bugjs/js/src",
             "../bugpack/projects/bugpack-client/js/src"
         ]
     },
@@ -109,19 +103,17 @@ buildProperties({
         sourcePaths: [
             "./projects/minerbug/js/src",
             "./projects/minerbugapi/js/src",
-            "../bugjs/projects/bugmeta/js/src",
-            '../bugjs/projects/bugflow/js/src',
-            "../bugjs/projects/bugjs/js/src",
-            "../bugjs/projects/bugtrace/js/src",
-            "../bugunit/projects/bugdouble/js/src",
-            "../bugunit/projects/bugunit/js/src"
+            "../bugcore/libraries/bugcore/js/src",
+            "../bugdouble/libraries/bugdouble/js/src",
+            "../bugmeta/libraries/bugmeta/js/src",
+            "../bugunit/libraries/bugunit/js/src"
         ],
         scriptPaths: [
             "./projects/minerbugapi/js/scripts",
-            "../bugunit/projects/bugunit/js/scripts"
+            "../bugunit/libraries/bugunit/js/scripts"
         ],
         testPaths: [
-            "../bugjs/projects/bugjs/js/test"
+            "../bugcore/libraries/bugcore/js/test"
         ]
     },
     testfile: {
@@ -134,9 +126,6 @@ buildProperties({
 // Declare Local Tasks
 //-------------------------------------------------------------------------------
 
-    //-------------------------------------------------------------------------------
-    // Declare TestFile Properties
-    //-------------------------------------------------------------------------------
 TestFileProperties = {
     testFile: path.resolve(__dirname + '/projects/minerbug/js/testfile.txt'),
     seedFile: path.resolve(__dirname + '/projects/minerbug/js/seed/ipsumlorem.txt'),
