@@ -93,7 +93,7 @@ var JobBuilder = Class.extend(Obj, {
     build: function() {
         return new Job({
             dataSources: this.dataSources,
-            tasks: this.taskList.getValueArray()
+            tasks: this.taskList.toValueArray()
         });
     }
 });

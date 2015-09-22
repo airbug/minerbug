@@ -133,8 +133,8 @@ var Job = Class.extend(Obj, {
      */
     toObject: function() {
         return {
-            sources: this.sources.getValueArray(),
-            tasks: this.tasks.getValueArray()
+            sources: this.sources.toValueArray(),
+            tasks: this.tasks.toValueArray()
         }
     }
 });
